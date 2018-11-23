@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include <limits.h>
 #include "structs.h"
 
 
@@ -118,3 +119,54 @@ Adjacencias * adjacencias(Map * map, int lines, int columns, Point init) {
   }
 
 }
+
+//TODO Parte A remake
+//TODO ter um vetor que guarde os pontos visitados, alocação dinâmica
+//TODO criar um vetor com os pontos não visitados
+//TODO
+
+/*A matriz st tem o tamanho do mapa original, mas em cada index st[i][j] guarda o ponto PAI. A ideia é ir voltando para trás do ponto final para o ponto inicial
+*
+*/
+
+
+int dijkstra(Map** mapa, int numLines, int numColumns, Points** st, int** wt, Point initial, Point final) {
+  for(int i = 0; i < numLines; i++){
+    for(int j = 0; j < numColumns; j++){
+      wt[i][j] = MAX_INT;
+      st[i][j] = -1;
+    }
+  }
+  int x = -1; int y = -1;
+  Point v;
+
+  wt[initial->x][initial->y] = 0;
+
+  while(x != final->x && y != final->y){
+    v->x = acervo[0].x;
+    v->y = acervo[0].y;
+    if(wt[v->x][v->y] != MAX_INT){
+      //TODO remover este primeiro vertice da fila
+      //TODO fazer um ciclo for que itera por todas as adjacencias do vertice atual(o que foi tirado da fila)
+    }
+  }
+
+
+}
+
+
+
+//TODO Parte A
+//TODO receber a matriz e os pontos inicial e final
+//TODO pegar no primeiro ponto ver as adjacencias e fazer um acervo com as adjacencias
+//TODO pegar no elemento do acervo com menor custo e fazer as adjacencias dele, adiciona-las ao acervo
+//TODO tirar o elemento de menor custo e ver as suas adjacencias
+//TODO repetir este processo até que o elemento de mentor custo seja o ponto final, encontramos o caminho mais curto entre os 2 pontos
+
+
+
+
+//TODO Parte B
+//TODO receber a matriz e os diversos pontos
+//TODO pegar no primeiro ponto e preencher o acervo com as adjacencias
+//TODO assim que chegarmos ao ponto seguinte recomeçar o processo começando no ponto seguinte

@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <limits.h>
 #include "structs.h"
 #include "data.h"
 
@@ -37,7 +36,7 @@ void readFromFile(char * file_name) {
       switch (map->objective){
         //A :
         case 'A':
-        //TODO check if point can be accessed in a horse jump and if so only read the necessary lines
+        //check if point can be accessed in a horse jump and if so only read the necessary lines
         if(horseJump(map->points[0], map->points[1]) == 1){
           if(map->points[0].x > map->points[1].x){
             numLines = map->points[0].x + 1;
@@ -45,6 +44,7 @@ void readFromFile(char * file_name) {
             numLines = map->points[1].x + 1;
           }
           allocateMap(map, numLines, columns);
+
           //Read necessary lines for cost calcuations
           for(i = 0; i < numLines; i++){
             for(j = 0; j < columns; j++){
@@ -59,15 +59,22 @@ void readFromFile(char * file_name) {
           }
         }else{
           allocateMap(map, lines, columns);
+          //Alocação para a matriz st (de pontos, para o caminho)
+          Point **st = (Point**)malloc(sizeof(Point*)*lines);
+          //Alocação para a matriz wt (de custos)
+          int **wt = (int**)malloc(sizeof(int*)*lines);
+
           //Else read the rest of the lines
           for(i = 0; i < lines; i++){
+            st[i] = (Point*)malloc(sizeof(Point)*columns);
+            wt[i] = (int*)malloc(sizeof(int)*columns);
             for(j = 0; j < columns; j++){
               lixinho = fscanf(fp, "%d ", &map->map[i][j]);
             }
           }
           //Começar a criar uma lista de adjacências a partir do ponto inicial
-          pointsVector = adjacencias(map, lines, columns, map->points[0]);
-          djikstra(pointsVector);
+          // pointsVector = adjacencias(map, lines, columns, map->points[0]);
+          djikstra(map,lines, columns, st, wt);
         }
         break;
       }

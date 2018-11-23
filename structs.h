@@ -39,5 +39,6 @@ typedef struct Struct_adjacencias {
 }Adjacencias;
 
 int horseJump(Point init, Point final);
+int dijkstra(Map**, int, int, Points**, int**, Point, Point );
 
 #endif
