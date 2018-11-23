@@ -23,10 +23,16 @@ int horseJump(Point init, Point final) {
 }
 
 Adjacencias * insertNode(Adjacencias * head, Node * inserted){
+  if(head == NULL){
+    Adjacencias * new = (Adjacencias *)malloc(sizeof(Adjacencias));
+    new->adjacencia = inserted;
+    new->next = NULL;
+    return new;
+  }
   Adjacencias * new = (Adjacencias *)malloc(sizeof(Adjacencias));
-  new->adjacencia = node;
-  inserted->next = head->next;
-  head->next = inserted;
+  new->adjacencia = inserted;
+  new->next = head->next;
+  head->next = new;
   return head;
 }
 
@@ -40,48 +46,73 @@ Adjacencias * allHorseJumps(Map * map, int x, int y) {
     return new;
   }
 
-  if(play->map[x][y] == 0) {
+  if(map->map[x][y] == 0) {
     return new;
   }
 
-  new = (Adjacencias *)malloc(sizeof(Adjacencias));
-  //Gerar a adjacencia inicial(ponto que estamos a contabilizar) e po-lo como a head
-  Node initPoint = (Node*)malloc(sizeof(Node));
-  initPoint->point->x = x;
-  initPoint->point->y = y;
-  new->adjacencia = initPoint;
-
 
   if(((tmp = checkPlay(x, y, 2, 1, map)) <= cost) && tmp != -1) {
-    Node node1 = (Node *)malloc(sizeof(Node));
-    node1->point->x = x + 2;
-    node1->point->y = y + 1;
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x + 2;
+    node1->point.y = y + 1;
+    node1->Weight = tmp;
     new = insertNode(new, node1);
     // new[1].point = point1;
   }
-  if(((tmp = checkPlay(x, y, 2, -1, play)) <= cost) && tmp != -1) {
-    Node node1 = (Node *)malloc(sizeof(Node));
-    node1->point->x = x + 2;
-    node1->point->y = y + -1;
+  if(((tmp = checkPlay(x, y, 2, -1, map)) <= cost) && tmp != -1) {
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x + 2;
+    node1->point.y = y - 1;
+    node1->Weight = tmp;
     new = insertNode(new, node1);
   }
-  if(((tmp = checkPlay(play->points[0].x, play->points[0].y, -2, 1, play)) <= cost) && tmp != -1) {
-
+  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -2, 1, map)) <= cost) && tmp != -1) {
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x - 2;
+    node1->point.y = y + 1;
+    node1->Weight = tmp;
+    new = insertNode(new, node1);
   }
-  if(((tmp = checkPlay(play->points[0].x, play->points[0].y, -2, -1, play)) <= cost) && tmp != -1) {
-
+  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -2, -1, map)) <= cost) && tmp != -1) {
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x - 2;
+    node1->point.y = y - 1;
+    node1->Weight = tmp;
+    new = insertNode(new, node1);
   }
-  if(((tmp = checkPlay(play->points[0].x, play->points[0].y, 1, 2, play)) <= cost) && tmp != -1) {
-
+  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, 1, 2, map)) <= cost) && tmp != -1) {
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x + 1;
+    node1->point.y = y + 2;
+    node1->Weight = tmp;
+    new = insertNode(new, node1);
   }
-  if(((tmp = checkPlay(play->points[0].x, play->points[0].y, 1, -2, play)) <= cost) && tmp != -1) {
-
+  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, 1, -2, map)) <= cost) && tmp != -1) {
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x + 1;
+    node1->point.y = y - 2;
+    node1->Weight = tmp;
+    new = insertNode(new, node1);
   }
-  if(((tmp = checkPlay(play->points[0].x, play->points[0].y, -1, 2, play)) <= cost) && tmp != -1) {
-
+  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -1, 2, map)) <= cost) && tmp != -1) {
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x - 1;
+    node1->point.y = y + 2;
+    node1->Weight = tmp;
+    new = insertNode(new, node1);
   }
-  if(((tmp = checkPlay(play->points[0].x, play->points[0].y, -1, -2, play)) <= cost) && tmp != -1) {
+  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -1, -2, map)) <= cost) && tmp != -1) {
+    Node * node1 = (Node *)malloc(sizeof(Node));
+    node1->point.x = x - 1;
+    node1->point.y = y - 2;
+    node1->Weight = tmp;
+    new = insertNode(new, node1);
+  }
 
+  printf("ADJACENCIAS\n");
+  while(new != NULL){
+    printf("%d\n", new->adjacencia->Weight);
+    new = new->next;
   }
 
 }
@@ -104,21 +135,21 @@ int checkPlay(int posX, int posY, int horizontal, int vertical, Map *play) {
   return play->map[finalPosX][finalPosY];
 }
 
-Adjacencias * adjacencias(Map * map, int lines, int columns, Point init) {
-  Adjacencias * head = NULL;
-  int counter = 0;
-  Adjacencias * array = (Adjacencias *)malloc(sizeof(Adjacencias) * lines * columns);
-  for(int i = 0; i < lines; i++){
-    for(int j = 0; j < columns; j++){
-      if(map[i][j] != 0){
-        head = allHorseJumps(map, i, j);
-        array[counter] = head;
-        counter++;
-      }
-    }
-  }
-
-}
+// Adjacencias * adjacencias(Map * map, int lines, int columns, Point init) {
+//   Adjacencias * head = NULL;
+//   int counter = 0;
+//   Adjacencias * array = (Adjacencias *)malloc(sizeof(Adjacencias) * lines * columns);
+//   for(int i = 0; i < lines; i++){
+//     for(int j = 0; j < columns; j++){
+//       if(map[i][j] != 0){
+//         head = allHorseJumps(map, i, j);
+//         array[counter] = head;
+//         counter++;
+//       }
+//     }
+//   }
+//
+// }
 
 //TODO Parte A remake
 //TODO ter um vetor que guarde os pontos visitados, alocação dinâmica
@@ -130,29 +161,29 @@ Adjacencias * adjacencias(Map * map, int lines, int columns, Point init) {
 */
 
 
-int dijkstra(Map** mapa, int numLines, int numColumns, Points** st, int** wt, Point initial, Point final) {
-  for(int i = 0; i < numLines; i++){
-    for(int j = 0; j < numColumns; j++){
-      wt[i][j] = MAX_INT;
-      st[i][j] = -1;
-    }
-  }
-  int x = -1; int y = -1;
-  Point v;
-
-  wt[initial->x][initial->y] = 0;
-
-  while(x != final->x && y != final->y){
-    v->x = acervo[0].x;
-    v->y = acervo[0].y;
-    if(wt[v->x][v->y] != MAX_INT){
-      //TODO remover este primeiro vertice da fila
-      //TODO fazer um ciclo for que itera por todas as adjacencias do vertice atual(o que foi tirado da fila)
-    }
-  }
-
-
-}
+// int dijkstra(Map** mapa, int numLines, int numColumns, Points** st, int** wt, Point initial, Point final) {
+//   for(int i = 0; i < numLines; i++){
+//     for(int j = 0; j < numColumns; j++){
+//       wt[i][j] = MAX_INT;
+//       st[i][j] = -1;
+//     }
+//   }
+//   int x = -1; int y = -1;
+//   Point v;
+//
+//   wt[initial->x][initial->y] = 0;
+//
+//   while(x != final->x && y != final->y){
+//     v->x = acervo[0].x;
+//     v->y = acervo[0].y;
+//     if(wt[v->x][v->y] != MAX_INT){
+//       //TODO remover este primeiro vertice da fila
+//       //TODO fazer um ciclo for que itera por todas as adjacencias do vertice atual(o que foi tirado da fila)
+//     }
+//   }
+//
+//
+// }
 
 
 

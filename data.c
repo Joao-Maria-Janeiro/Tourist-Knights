@@ -64,7 +64,7 @@ void readFromFile(char * file_name) {
           //Alocação para a matriz wt (de custos)
           int **wt = (int**)malloc(sizeof(int*)*lines);
 
-          //Else read the rest of the lines
+          //Else read all the lines
           for(i = 0; i < lines; i++){
             st[i] = (Point*)malloc(sizeof(Point)*columns);
             wt[i] = (int*)malloc(sizeof(int)*columns);
@@ -74,7 +74,7 @@ void readFromFile(char * file_name) {
           }
           //Começar a criar uma lista de adjacências a partir do ponto inicial
           // pointsVector = adjacencias(map, lines, columns, map->points[0]);
-          djikstra(map,lines, columns, st, wt);
+          // djikstra(map,lines, columns, st, wt);
         }
         break;
       }
