@@ -18,7 +18,7 @@ void checkExtension(char * file_name, int argc) {
     printf("You must provide a input file\n");
     exit(1);
   }
-  if(strstr(file_name, "txt") == 0) {
+  if(strstr(file_name, "cities") == 0) {
     printf("Wrong file extension");
     exit(1);
   }

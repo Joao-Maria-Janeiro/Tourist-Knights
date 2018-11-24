@@ -2,9 +2,12 @@
 #include <stdio.h>
 #include "structs.h"
 #include "data.h"
+#include "heap.h"
 
 
 void readFromFile(char * file_name) {
+  Node *heap = NULL;
+  int heapSize=0, allocatedHeapSize=0;
   //create necessary variables
   int lineCounter = 0, lines=0, columns=0, numPoints=0, validMap = 0, i = 0, j = 0, lixinho = 0, numLines = 0;
   char objective = '0';
@@ -59,11 +62,11 @@ void readFromFile(char * file_name) {
           }
         }else{
           allocateMap(map, lines, columns);
+          numLines = lines;
           //Alocação para a matriz st (de pontos, para o caminho)
           Point **st = (Point**)malloc(sizeof(Point*)*lines);
           //Alocação para a matriz wt (de custos)
           int **wt = (int**)malloc(sizeof(int*)*lines);
-
           //Else read all the lines
           for(i = 0; i < lines; i++){
             st[i] = (Point*)malloc(sizeof(Point)*columns);
@@ -77,6 +80,10 @@ void readFromFile(char * file_name) {
           // djikstra(map,lines, columns, st, wt);
         }
         break;
+        case 'B':
+        break;
+        case 'C':
+        break;
       }
     }else{
       //Move the pointer to the end of the map
@@ -88,9 +95,44 @@ void readFromFile(char * file_name) {
     }
   }
 
+  heap = (Node*)malloc(sizeof(Node)*100);  //Alocacao de um tamanho "razoável"
+  allocatedHeapSize = 100;
+  //dijkstra(map, st, wt, heap, &heapSize, &allocatedHeapSize);
 
+
+  //TODO Após a leitura do mapa, adicionar os pontos ao acervo
+  /* TESTE DAS FUNCOES DO ACERVO
+  heap = (Node*)malloc(sizeof(Node)*5);
+  heapSize = 0;
+  Node tmp1;
+  tmp1.point.x=2;
+  tmp1.point.y=3;
+  tmp1.Weight = 10;
+  add(tmp1, heap, &heapSize);
+  printHeap(heapSize, heap);
+  Node tmp2;
+  tmp2.point.x=4;
+  tmp2.point.y=5;
+  tmp2.Weight = 11;
+  add(tmp2, heap, &heapSize);
+  printf("\n");
+  printHeap(heapSize, heap);
+  Node tmp3;
+  tmp3.point.x=7;
+  tmp3.point.y=7;
+  tmp3.Weight = 9;
+  add(tmp3, heap, &heapSize);
+  printf("\n");
+  printHeap(heapSize, heap);
+  pop(&heapSize, heap);
+  printf("\n");
+  printHeap(heapSize, heap);*/
+
+printf("\n\n");
 printMap(map, numLines);
 
+
+fclose(fp);
 }
 
 
