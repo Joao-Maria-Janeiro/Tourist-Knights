@@ -9,4 +9,6 @@ void allocateMap(Map * , int , int );
 int verifyMap(int , int , char , int );
 void printMap(Map* , int);
 void allocateMap(Map * , int , int );
+int verifyPoints(Map *, int);
+
 #endif

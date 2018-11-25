@@ -26,7 +26,7 @@ Node peek(int size, Node * items);
 Node pop(int *size, Node * items);
 
 
-void add(Node item, Node * items, int *size);
+void add(Node , Node * , int *, int *);
 
 void heapifyUp(int size, Node * items);
 

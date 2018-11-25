@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "structs.h"
 #include "data.h"
 #include "heap.h"
+
+#define INFINIY 2147483647
 
 
 void readFromFile(char * file_name) {
@@ -21,6 +24,23 @@ void readFromFile(char * file_name) {
     printf("Error opening file\n");
     exit(0);
   }
+
+
+  char *outfile_name=(char*)calloc(1, (strlen(file_name))*sizeof(char));
+  if(outfile_name == NULL){
+    exit(0);
+  }
+  int len = strlen(file_name) - strlen(".cities");
+  strncpy(outfile_name, file_name, len);
+  strcat(outfile_name, ".walks");
+
+
+  FILE *fout = fopen(outfile_name, "w");
+  if(fout == NULL){
+    printf("Error opening output file\n");
+    exit(0);
+  }
+
   while(fscanf(fp, "%d %d %c %d ", &lines, &columns, &objective, &numPoints) == 4){
     //verify if it's a valid map
     validMap=0;
@@ -35,6 +55,7 @@ void readFromFile(char * file_name) {
       for(i = 0; i < numPoints; i++){
         lixinho = fscanf(fp, "%d %d", &map->points[i].x, &map->points[i].y);
       }
+
       //select the correct read function for the current objective
       switch (map->objective){
         //A :
@@ -60,6 +81,8 @@ void readFromFile(char * file_name) {
             if(*linha == '\n')
               break;
           }
+          fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, map->map[map->points[1].x][map->points[1].y], 1);
+          fprintf(fout, "%d %d %d\n", map->points[1].x, map->points[1].y, map->map[map->points[1].x][map->points[1].y]);
         }else{
           allocateMap(map, lines, columns);
           numLines = lines;
@@ -67,17 +90,24 @@ void readFromFile(char * file_name) {
           Point **st = (Point**)malloc(sizeof(Point*)*lines);
           //Alocação para a matriz wt (de custos)
           int **wt = (int**)malloc(sizeof(int*)*lines);
+          Point empty;
+          empty.x = -1;
+          empty.y = -1;
           //Else read all the lines
           for(i = 0; i < lines; i++){
             st[i] = (Point*)malloc(sizeof(Point)*columns);
             wt[i] = (int*)malloc(sizeof(int)*columns);
             for(j = 0; j < columns; j++){
+              wt[i][j] = INFINIY;
+              st[i][j] = empty;
               lixinho = fscanf(fp, "%d ", &map->map[i][j]);
             }
           }
-          //Começar a criar uma lista de adjacências a partir do ponto inicial
-          // pointsVector = adjacencias(map, lines, columns, map->points[0]);
-          // djikstra(map,lines, columns, st, wt);
+          if(verifyPoints(map, numPoints)) {
+            djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout);
+          }else {
+            fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+          }
         }
         break;
         case 'B':
@@ -85,6 +115,7 @@ void readFromFile(char * file_name) {
         case 'C':
         break;
       }
+      fprintf(fout, "\n");
     }else{
       //Move the pointer to the end of the map
       while(fgets(linha, 4, fp) != NULL) {
@@ -95,46 +126,25 @@ void readFromFile(char * file_name) {
     }
   }
 
-  heap = (Node*)malloc(sizeof(Node)*100);  //Alocacao de um tamanho "razoável"
-  allocatedHeapSize = 100;
-  //dijkstra(map, st, wt, heap, &heapSize, &allocatedHeapSize);
-
-
-  //TODO Após a leitura do mapa, adicionar os pontos ao acervo
-  /* TESTE DAS FUNCOES DO ACERVO
-  heap = (Node*)malloc(sizeof(Node)*5);
-  heapSize = 0;
-  Node tmp1;
-  tmp1.point.x=2;
-  tmp1.point.y=3;
-  tmp1.Weight = 10;
-  add(tmp1, heap, &heapSize);
-  printHeap(heapSize, heap);
-  Node tmp2;
-  tmp2.point.x=4;
-  tmp2.point.y=5;
-  tmp2.Weight = 11;
-  add(tmp2, heap, &heapSize);
-  printf("\n");
-  printHeap(heapSize, heap);
-  Node tmp3;
-  tmp3.point.x=7;
-  tmp3.point.y=7;
-  tmp3.Weight = 9;
-  add(tmp3, heap, &heapSize);
-  printf("\n");
-  printHeap(heapSize, heap);
-  pop(&heapSize, heap);
-  printf("\n");
-  printHeap(heapSize, heap);*/
 
 printf("\n\n");
 printMap(map, numLines);
 
-
+free(outfile_name);
 fclose(fp);
+fclose(fout);
 }
 
+/*Se algum dos pontos a percorrer é igual a 0, mapa invalido
+*/
+int verifyPoints(Map *map, int numPoints) {
+  for(int i=0; i<numPoints; i++) {
+    if(map->map[map->points[i].x][map->points[i].y] == 0) {
+      return 0;
+    }
+  }
+  return 1;
+}
 
 int verifyMap(int lines, int columns, char objective, int numPoints) {
   if(objective != 'A'  && objective != 'B'){

@@ -1,8 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include <limits.h>
 #include "structs.h"
+#include "heap.h"
 
+#define INFINIY 2147483647
 
 /* horseJump()
 *  Checking if 2 points are connected by a horse jump
@@ -36,90 +37,96 @@ Adjacencias * insertNode(Adjacencias * head, Node * inserted){
   return head;
 }
 
-Adjacencias * allHorseJumps(Map * map, int x, int y) {
-  Adjacencias * new = NULL;
+Node * allHorseJumps(Map * map, int x, int y, int *size) {
+  Node * array = (Node *)malloc(8 * sizeof(Node));
   int cost = 1000;
   int tmp = 0;
   int isZero = 0;
 
-  if(x >= map->lines || y >= map->columns || x < 0 || y < 0 ) {
-    return new;
-  }
+  (*size) = 0;
 
+  if(x >= map->lines || y >= map->columns || x < 0 || y < 0 ) {
+    return NULL;
+  }
   if(map->map[x][y] == 0) {
-    return new;
+    return NULL;
   }
 
 
   if(((tmp = checkPlay(x, y, 2, 1, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x + 2;
-    node1->point.y = y + 1;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
-    // new[1].point = point1;
+    Node node1;
+    node1.point.x = x + 1;
+    node1.point.y = y + 2;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
   }
   if(((tmp = checkPlay(x, y, 2, -1, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x + 2;
-    node1->point.y = y - 1;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
+    Node node1;
+    node1.point.x = x - 1;
+    node1.point.y = y + 2;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
   }
-  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -2, 1, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x - 2;
-    node1->point.y = y + 1;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
+  if(((tmp = checkPlay(x, y, -2, 1, map)) <= cost) && tmp != -1) {
+    Node node1;
+    node1.point.x = x + 1;
+    node1.point.y = y - 2;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
   }
-  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -2, -1, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x - 2;
-    node1->point.y = y - 1;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
+  if(((tmp = checkPlay(x, y, -2, -1, map)) <= cost) && tmp != -1) {
+    Node node1;
+    node1.point.x = x - 1;
+    node1.point.y = y - 2;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
   }
-  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, 1, 2, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x + 1;
-    node1->point.y = y + 2;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
-  }
-  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, 1, -2, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x + 1;
-    node1->point.y = y - 2;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
-  }
-  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -1, 2, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x - 1;
-    node1->point.y = y + 2;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
-  }
-  if(((tmp = checkPlay(map->points[0].x, map->points[0].y, -1, -2, map)) <= cost) && tmp != -1) {
-    Node * node1 = (Node *)malloc(sizeof(Node));
-    node1->point.x = x - 1;
-    node1->point.y = y - 2;
-    node1->Weight = tmp;
-    new = insertNode(new, node1);
+  if(((tmp = checkPlay(x, y, 1, 2, map)) <= cost) && tmp != -1) {
+    Node node1;
+    node1.point.x = x + 2;
+    node1.point.y = y + 1;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
   }
 
-  printf("ADJACENCIAS\n");
-  while(new != NULL){
-    printf("%d\n", new->adjacencia->Weight);
-    new = new->next;
+  if(((tmp = checkPlay(x, y, 1, -2, map)) <= cost) && tmp != -1) {
+    Node node1;
+    node1.point.x = x - 2;
+    node1.point.y = y + 1;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
   }
+  if(((tmp = checkPlay(x, y, -1, 2, map)) <= cost) && tmp != -1) {
+    Node node1;
+    node1.point.x = x + 2;
+    node1.point.y = y - 1;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
+  }
+  if(((tmp = checkPlay(x, y, -1, -2, map)) <= cost) && tmp != -1) {
+    Node node1;
+    node1.point.x = x - 2;
+    node1.point.y = y - 1;
+    node1.Weight = tmp;
+    array[(*size)] = node1;
+    (*size)++;
+  }
+
+  return array;
 
 }
 
 int checkPlay(int posX, int posY, int horizontal, int vertical, Map *play) {
   int finalPosX = posX + vertical;
   int finalPosY = posY + horizontal;
+
 
   if(finalPosX < 0 || finalPosX >= play->lines){
     return -1;
@@ -132,72 +139,87 @@ int checkPlay(int posX, int posY, int horizontal, int vertical, Map *play) {
     return -1;
   }
 
+
   return play->map[finalPosX][finalPosY];
 }
 
-// Adjacencias * adjacencias(Map * map, int lines, int columns, Point init) {
-//   Adjacencias * head = NULL;
-//   int counter = 0;
-//   Adjacencias * array = (Adjacencias *)malloc(sizeof(Adjacencias) * lines * columns);
-//   for(int i = 0; i < lines; i++){
-//     for(int j = 0; j < columns; j++){
-//       if(map[i][j] != 0){
-//         head = allHorseJumps(map, i, j);
-//         array[counter] = head;
-//         counter++;
-//       }
-//     }
-//   }
-//
-// }
 
-//TODO Parte A remake
-//TODO ter um vetor que guarde os pontos visitados, alocação dinâmica
-//TODO criar um vetor com os pontos não visitados
-//TODO
 
 /*A matriz st tem o tamanho do mapa original, mas em cada index st[i][j] guarda o ponto PAI. A ideia é ir voltando para trás do ponto final para o ponto inicial
 *
 */
+void * djikstraTypeA(Map * map, Point initial, Point final, Point ** st, int ** wt, FILE * fout) {
+  int allocatedHeapSize = 100;
+  int heapSize = 0;
+  int toInsertSize = 0;
+  Point currentPoint;
+  Node * acervo = (Node *)malloc(100 * sizeof(Node));
+  st[initial.x][initial.y] = initial;
+  wt[initial.x][initial.y] = 0;
+  currentPoint.x = initial.x;
+  currentPoint.y = initial.y;
+  Adjacencias * adj;
+  Node tmp;
+  tmp.point = initial;
+  tmp.Weight = map->map[initial.x][initial.y];
+  add(tmp, acervo, &heapSize, &allocatedHeapSize);
 
+  //We iterate until the point that comes out of the heap is the last point
+  while(!((currentPoint.x == final.x) && (currentPoint.y == final.y))){
+    Node *toInsert= NULL;
+    //We get the smallest value from the heap removing it from the array
+    currentPoint = pop(&heapSize ,acervo).point;
+    if(wt[currentPoint.x][currentPoint.y] != INFINIY){ //Check if the point hasn't been visited yet
+      // We get all the adjacencies of the current point
+      toInsert = allHorseJumps(map, currentPoint.x, currentPoint.y, &toInsertSize);
+      for(int i=0; i<toInsertSize; i++) {
+        if(wt[toInsert[i].point.x][toInsert[i].point.y] > wt[currentPoint.x][currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y]){
+          wt[toInsert[i].point.x][toInsert[i].point.y] = wt[currentPoint.x][currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y];
+          st[toInsert[i].point.x][toInsert[i].point.y] = currentPoint;
+          toInsert[i].Weight = wt[toInsert[i].point.x][toInsert[i].point.y];
+          //Add the adjacencies one by one to the heap
+          add(toInsert[i], acervo, &heapSize, &allocatedHeapSize);
+        }
+      }
+      free(toInsert);
+    }
+  }
 
-// int dijkstra(Map** mapa, int numLines, int numColumns, Points** st, int** wt, Point initial, Point final) {
-//   for(int i = 0; i < numLines; i++){
-//     for(int j = 0; j < numColumns; j++){
-//       wt[i][j] = MAX_INT;
-//       st[i][j] = -1;
-//     }
+  printf("%d\n", wt[final.x][final.y]);
+  printWalk(map, st, wt, initial, final, fout);
+}
+
+void printWalk(Map *map, Point ** st, int **wt, Point initial, Point final, FILE *fout){
+  Point tmp = final;
+  Point * array = (Point*)malloc(sizeof(Point)* 100);
+  int arraySize = 100;
+  int count = 0;
+  array[count] = final;
+  while(!((tmp.x == initial.x) && (tmp.y == initial.y))){
+    if(count > arraySize){
+      array = (Point *)realloc(array, (arraySize + 100)*sizeof(Point));
+      arraySize += 100;
+    }
+    count++;
+    tmp = st[tmp.x][tmp.y];
+    array[count] = tmp;
+  }
+
+  fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[final.x][final.y], count);
+  for(int i=count-1; i>=0; i--) {
+    fprintf(fout, "%d %d %d\n", array[i].x, array[i].y, map->map[array[i].x][array[i].y]);
+  }
+}
+
+// void printWalk(Point ** st, Point initial, Point tmp, FILE *fout, int * count) {
+//   if(((tmp.x == initial.x) && (tmp.y == initial.y))) {
+//     (*count)++;
+//     return;
 //   }
-//   int x = -1; int y = -1;
-//   Point v;
-//
-//   wt[initial->x][initial->y] = 0;
-//
-//   while(x != final->x && y != final->y){
-//     v->x = acervo[0].x;
-//     v->y = acervo[0].y;
-//     if(wt[v->x][v->y] != MAX_INT){
-//       //TODO remover este primeiro vertice da fila
-//       //TODO fazer um ciclo for que itera por todas as adjacencias do vertice atual(o que foi tirado da fila)
-//     }
+//   if(*count == 0){
+//     fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[final.x][final.y], (*count));
 //   }
-//
+//   printWalk(st, initial, st[tmp.x][tmp.y], &count);
+//   fprintf(fout, "(%d %d)\n", tmp.x, tmp.y);
 //
 // }
-
-
-
-//TODO Parte A
-//TODO receber a matriz e os pontos inicial e final
-//TODO pegar no primeiro ponto ver as adjacencias e fazer um acervo com as adjacencias
-//TODO pegar no elemento do acervo com menor custo e fazer as adjacencias dele, adiciona-las ao acervo
-//TODO tirar o elemento de menor custo e ver as suas adjacencias
-//TODO repetir este processo até que o elemento de mentor custo seja o ponto final, encontramos o caminho mais curto entre os 2 pontos
-
-
-
-
-//TODO Parte B
-//TODO receber a matriz e os diversos pontos
-//TODO pegar no primeiro ponto e preencher o acervo com as adjacencias
-//TODO assim que chegarmos ao ponto seguinte recomeçar o processo começando no ponto seguinte
