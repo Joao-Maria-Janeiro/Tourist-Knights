@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include "structs.h"
 #include "heap.h"
 
@@ -148,14 +149,15 @@ int checkPlay(int posX, int posY, int horizontal, int vertical, Map *play) {
 /*A matriz st tem o tamanho do mapa original, mas em cada index st[i][j] guarda o ponto PAI. A ideia é ir voltando para trás do ponto final para o ponto inicial
 *
 */
-void * djikstraTypeA(Map * map, Point initial, Point final, Point ** st, int ** wt, FILE * fout) {
+Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * wt, FILE * fout, int *_count) {
   int allocatedHeapSize = 100;
   int heapSize = 0;
   int toInsertSize = 0;
   Point currentPoint;
   Node * acervo = (Node *)malloc(100 * sizeof(Node));
-  st[initial.x][initial.y] = initial;
-  wt[initial.x][initial.y] = 0;
+  st[initial.x * (map->columns) + initial.y] = initial;
+  //wt[initial.x][initial.y] = 0;
+  wt[initial.x * (map->columns) + initial.y] = 0;
   currentPoint.x = initial.x;
   currentPoint.y = initial.y;
   Adjacencias * adj;
@@ -165,18 +167,18 @@ void * djikstraTypeA(Map * map, Point initial, Point final, Point ** st, int ** 
   add(tmp, acervo, &heapSize, &allocatedHeapSize);
 
   //We iterate until the point that comes out of the heap is the last point
-  while(!((currentPoint.x == final.x) && (currentPoint.y == final.y))){
+  while(!(((currentPoint.x == final.x) && (currentPoint.y == final.y)) || acervo == NULL)){
     Node *toInsert= NULL;
     //We get the smallest value from the heap removing it from the array
     currentPoint = pop(&heapSize ,acervo).point;
-    if(wt[currentPoint.x][currentPoint.y] != INFINIY){ //Check if the point hasn't been visited yet
+    if(wt[currentPoint.x * (map->columns) + currentPoint.y] != INFINIY){ //Check if the point hasn't been visited yet
       // We get all the adjacencies of the current point
       toInsert = allHorseJumps(map, currentPoint.x, currentPoint.y, &toInsertSize);
       for(int i=0; i<toInsertSize; i++) {
-        if(wt[toInsert[i].point.x][toInsert[i].point.y] > wt[currentPoint.x][currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y]){
-          wt[toInsert[i].point.x][toInsert[i].point.y] = wt[currentPoint.x][currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y];
-          st[toInsert[i].point.x][toInsert[i].point.y] = currentPoint;
-          toInsert[i].Weight = wt[toInsert[i].point.x][toInsert[i].point.y];
+        if(wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y] > wt[currentPoint.x * (map->columns) + currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y]){
+          wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y] = wt[currentPoint.x * (map->columns) + currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y];
+          st[toInsert[i].point.x*(map->columns)+toInsert[i].point.y] = currentPoint;
+          toInsert[i].Weight = wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y];
           //Add the adjacencies one by one to the heap
           add(toInsert[i], acervo, &heapSize, &allocatedHeapSize);
         }
@@ -185,30 +187,87 @@ void * djikstraTypeA(Map * map, Point initial, Point final, Point ** st, int ** 
     }
   }
 
-  printf("%d\n", wt[final.x][final.y]);
-  printWalk(map, st, wt, initial, final, fout);
+  if((acervo == NULL) && (currentPoint.x != final.x && currentPoint.y != final.y)){
+    fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
+    return NULL;
+  }
+
+  printf("COST : %d\n", wt[final.x * (map->columns) + final.y]);
+  return createWalk(map, st, wt, initial, final, fout, _count);
 }
 
-void printWalk(Map *map, Point ** st, int **wt, Point initial, Point final, FILE *fout){
+
+Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FILE *fout, int * _count){
   Point tmp = final;
   Point * array = (Point*)malloc(sizeof(Point)* 100);
   int arraySize = 100;
   int count = 0;
   array[count] = final;
+
+  //Iterate through the array in inverse order to count the points and add them to the array
   while(!((tmp.x == initial.x) && (tmp.y == initial.y))){
     if(count > arraySize){
       array = (Point *)realloc(array, (arraySize + 100)*sizeof(Point));
       arraySize += 100;
     }
     count++;
-    tmp = st[tmp.x][tmp.y];
+    tmp = st[tmp.x * (map->columns) + tmp.y];
     array[count] = tmp;
   }
 
-  fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[final.x][final.y], count);
-  for(int i=count-1; i>=0; i--) {
-    fprintf(fout, "%d %d %d\n", array[i].x, array[i].y, map->map[array[i].x][array[i].y]);
+  *_count = count;
+  return array;
+  //
+  // //Print the header
+  // fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[final.x * (map->columns) + final.y], count);
+  // for(int i=count-1; i>=0; i--) {
+  //   fprintf(fout, "%d %d %d\n", array[i].x, array[i].y, map->map[array[i].x][array[i].y]); //Print the path
+  // }
+}
+
+
+
+
+void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout){
+  Point empty;
+  empty.x = -1;
+  empty.y = -1;
+  int * counts = (int *)malloc( (map->numPoints - 1) * sizeof(int));
+  int count = 0, size = 0, cost = 0;
+  Point ** aux = (Point **)malloc((map->numPoints - 1) * sizeof(Point *));
+  Point * array = (Point *)malloc( sizeof(Point));
+  for(int i = 0; i < map->numPoints - 1; i++){
+    for(int j = 0; j < (map->columns * map->lines); j++){
+      wt[j] = INFINIY;
+      st[j] = empty;
+    }
+    if(horseJump(map->points[i], map->points[i+1])) {
+      printf("FEITO\n");
+      //fprintf(fout, "%d %d %d\n", map->points[i+1].x, map->points[i+1].y, map->map[map->points[i+1].x][map->points[i+1].y]);
+      aux[i] = (Point*)malloc(sizeof(Point));
+      aux[i][0] = map->points[i+1];
+      count = 1;
+      counts[i] = count;
+      size += count;
+      cost += wt[map->points[i+1].x * (map->columns) + map->points[i+1].y];
+    }else {
+      printf("dTasTdTT\n");
+      aux[i] = djikstraTypeA(map, map->points[i], map->points[i+1], st, wt, fout, &count);
+      counts[i] = count;
+      size += count;
+      cost += wt[map->points[i+1].x * (map->columns) + map->points[i+1].y];
+    }
   }
+
+  //Print the header
+  fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, size);
+  for(int j=0; j < map->numPoints-1; j++) {
+    for(int i=counts[j]-1; i>=0; i--) {
+      fprintf(fout, "%d %d %d\n", aux[j][i].x, aux[j][i].y, map->map[aux[j][i].x][aux[j][i].y]); //Print the path
+    }
+  }
+  free(array);
+  free(counts);
 }
 
 // void printWalk(Point ** st, Point initial, Point tmp, FILE *fout, int * count) {

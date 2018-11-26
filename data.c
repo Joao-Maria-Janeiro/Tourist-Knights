@@ -11,6 +11,7 @@
 void readFromFile(char * file_name) {
   Node *heap = NULL;
   int heapSize=0, allocatedHeapSize=0;
+  int count = 0;
   //create necessary variables
   int lineCounter = 0, lines=0, columns=0, numPoints=0, validMap = 0, i = 0, j = 0, lixinho = 0, numLines = 0;
   char objective = '0';
@@ -56,12 +57,9 @@ void readFromFile(char * file_name) {
         lixinho = fscanf(fp, "%d %d", &map->points[i].x, &map->points[i].y);
       }
 
-      //select the correct read function for the current objective
-      switch (map->objective){
-        //A :
-        case 'A':
-        //check if point can be accessed in a horse jump and if so only read the necessary lines
-        if(horseJump(map->points[0], map->points[1]) == 1){
+      //If it's type A we check if it can be done with only one horse jump
+      //check if point can be accessed in a horse jump and if so only read the necessary lines
+        if(map->objective == 'A' && (horseJump(map->points[0], map->points[1]) == 1)){
           if(map->points[0].x > map->points[1].x){
             numLines = map->points[0].x + 1;
           }else{
@@ -87,34 +85,44 @@ void readFromFile(char * file_name) {
           allocateMap(map, lines, columns);
           numLines = lines;
           //Alocação para a matriz st (de pontos, para o caminho)
-          Point **st = (Point**)malloc(sizeof(Point*)*lines);
+          Point *st = (Point*)malloc(sizeof(Point)*(lines * columns));
           //Alocação para a matriz wt (de custos)
-          int **wt = (int**)malloc(sizeof(int*)*lines);
+          int *wt = (int*)malloc(sizeof(int)*(lines * columns));
           Point empty;
           empty.x = -1;
           empty.y = -1;
           //Else read all the lines
           for(i = 0; i < lines; i++){
-            st[i] = (Point*)malloc(sizeof(Point)*columns);
-            wt[i] = (int*)malloc(sizeof(int)*columns);
+            // st[i] = (Point*)malloc(sizeof(Point)*columns);
+            // wt[i] = (int*)malloc(sizeof(int)*columns);
             for(j = 0; j < columns; j++){
-              wt[i][j] = INFINIY;
-              st[i][j] = empty;
+              wt[i*columns + j] = INFINIY;
+              st[i*columns + j] = empty;
               lixinho = fscanf(fp, "%d ", &map->map[i][j]);
             }
           }
-          if(verifyPoints(map, numPoints)) {
-            djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout);
-          }else {
-            fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+          //select the correct read function for the current objective
+          switch (map->objective){
+            case 'A':
+              if(verifyPoints(map, numPoints)) {
+                djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout, &count);
+              }else {
+                fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+              }
+              free(st);
+              free(wt);
+            break;
+            case 'B':
+            if(verifyPoints(map, numPoints)) {
+              djikstraTypeB(map, st, wt, fout);
+            }else {
+              fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+            }
+            break;
+            case 'C':
+            break;
           }
         }
-        break;
-        case 'B':
-        break;
-        case 'C':
-        break;
-      }
       fprintf(fout, "\n");
     }else{
       //Move the pointer to the end of the map

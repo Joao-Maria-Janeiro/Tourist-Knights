@@ -41,6 +41,7 @@ typedef struct Struct_adjacencias {
 int horseJump(Point , Point );
 Node * allHorseJumps(Map *, int , int , int *);
 int checkPlay(int , int , int , int , Map *);
-void * djikstraTypeA(Map * , Point , Point , Point ** , int ** , FILE * );
-void printWalk(Map *,Point **, int ** , Point , Point, FILE *);
+Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * wt, FILE * fout, int *_count);
+void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout);
+Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FILE *fout, int * _count);
 #endif
