@@ -12,6 +12,7 @@ void readFromFile(char * file_name) {
   Node *heap = NULL;
   int heapSize=0, allocatedHeapSize=0;
   int count = 0;
+  Point * toPrint = NULL;
   //create necessary variables
   int lineCounter = 0, lines=0, columns=0, numPoints=0, validMap = 0, i = 0, j = 0, lixinho = 0, numLines = 0;
   char objective = '0';
@@ -105,7 +106,11 @@ void readFromFile(char * file_name) {
           switch (map->objective){
             case 'A':
               if(verifyPoints(map, numPoints)) {
-                djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout, &count);
+                toPrint = djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout, &count);
+                fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[(map->points[1].x *map->columns) + map->points[1].y], count);
+                for(int i=count -1; i>=0; i--) {
+                  fprintf(fout, "%d %d %d\n", toPrint[i].x, toPrint[i].y, map->map[toPrint[i].x][toPrint[i].y]); //Print the path
+                }
               }else {
                 fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
               }
@@ -113,11 +118,13 @@ void readFromFile(char * file_name) {
               free(wt);
             break;
             case 'B':
-            if(verifyPoints(map, numPoints)) {
-              djikstraTypeB(map, st, wt, fout);
-            }else {
-              fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
-            }
+              if(verifyPoints(map, numPoints)) {
+                djikstraTypeB(map, st, wt, fout);
+              }else {
+                fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+              }
+              free(st);
+              free(wt);
             break;
             case 'C':
             break;
