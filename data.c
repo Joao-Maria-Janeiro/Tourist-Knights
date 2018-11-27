@@ -82,6 +82,7 @@ void readFromFile(char * file_name) {
           }
           fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, map->map[map->points[1].x][map->points[1].y], 1);
           fprintf(fout, "%d %d %d\n", map->points[1].x, map->points[1].y, map->map[map->points[1].x][map->points[1].y]);
+          freeMap(map, numLines);
         }else{
           allocateMap(map, lines, columns);
           numLines = lines;
@@ -107,15 +108,18 @@ void readFromFile(char * file_name) {
             case 'A':
               if(verifyPoints(map, numPoints)) {
                 toPrint = djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout, &count);
-                fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[(map->points[1].x *map->columns) + map->points[1].y], count);
-                for(int i=count -1; i>=0; i--) {
-                  fprintf(fout, "%d %d %d\n", toPrint[i].x, toPrint[i].y, map->map[toPrint[i].x][toPrint[i].y]); //Print the path
+                if(toPrint != NULL){
+                  fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[(map->points[1].x *map->columns) + map->points[1].y], count);
+                  for(int i=count -1; i>=0; i--) {
+                    fprintf(fout, "%d %d %d\n", toPrint[i].x, toPrint[i].y, map->map[toPrint[i].x][toPrint[i].y]); //Print the path
+                  }
                 }
               }else {
                 fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
               }
               free(st);
               free(wt);
+              freeMap(map, map->lines);
             break;
             case 'B':
               if(verifyPoints(map, numPoints)) {
@@ -125,6 +129,7 @@ void readFromFile(char * file_name) {
               }
               free(st);
               free(wt);
+              freeMap(map, map->lines);
             break;
             case 'C':
             break;
@@ -141,13 +146,18 @@ void readFromFile(char * file_name) {
     }
   }
 
-
-printf("\n\n");
-printMap(map, numLines);
-
 free(outfile_name);
 fclose(fp);
 fclose(fout);
+}
+
+void freeMap(Map* map, int lines) {
+  free(map->points);
+  for(int i=0; i<lines; i++) {
+    free(map->map[i]);
+  }
+  free(map->map);
+  free(map);
 }
 
 /*Se algum dos pontos a percorrer é igual a 0, mapa invalido

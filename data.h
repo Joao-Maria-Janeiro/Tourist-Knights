@@ -8,6 +8,7 @@ void allocatePoints(Map * , int , int , char , int );
 void allocateMap(Map * , int , int );
 int verifyMap(int , int , char , int );
 void printMap(Map* , int);
+void freeMap(Map*, int);
 void allocateMap(Map * , int , int );
 int verifyPoints(Map *, int);
 

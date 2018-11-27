@@ -119,9 +119,7 @@ Node * allHorseJumps(Map * map, int x, int y, int *size) {
     array[(*size)] = node1;
     (*size)++;
   }
-
   return array;
-
 }
 
 int checkPlay(int posX, int posY, int horizontal, int vertical, Map *play) {
@@ -168,14 +166,10 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
   int count = 0;
 
   //We iterate until the point that comes out of the heap is the last point
-  while(!(((currentPoint.x == final.x) && (currentPoint.y == final.y)))){
+  while(!(((currentPoint.x == final.x) && (currentPoint.y == final.y))) && heapSize != 0){
     Node *toInsert= NULL;
     //We get the smallest value from the heap removing it from the array
     currentPoint = pop(&heapSize ,acervo).point;
-    if(currentPoint.x < 0 || currentPoint.x > map->lines || currentPoint.y < 0 || currentPoint.y > map->columns){
-      fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
-      break;
-    }
     if(wt[currentPoint.x * (map->columns) + currentPoint.y] != INFINIY){ //Check if the point hasn't been visited yet
       // We get all the adjacencies of the current point
       toInsert = allHorseJumps(map, currentPoint.x, currentPoint.y, &toInsertSize);
@@ -186,14 +180,14 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
           toInsert[i].Weight = wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y];
           //Add the adjacencies one by one to the heap
           add(toInsert[i], acervo, &heapSize, &allocatedHeapSize);
-          printf("COUNT : %d\n", count);
           count++;
         }
       }
       free(toInsert);
     }
   }
-  if((currentPoint.x != final.x && currentPoint.y != final.y)){
+  free(acervo);
+  if((currentPoint.x != final.x && currentPoint.y != final.y) || heapSize == 0){
     fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
     return NULL;
   }
@@ -270,6 +264,10 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout){
   }
   free(array);
   free(counts);
+  for(int i=0; i<map->numPoints - 1; i++) {
+    free(aux[i]);
+  }
+  free(aux);
 }
 
 // void printWalk(Point ** st, Point initial, Point tmp, FILE *fout, int * count) {
