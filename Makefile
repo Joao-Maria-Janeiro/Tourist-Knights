@@ -36,8 +36,9 @@ run: $(EXECUTABLE)
 	done
 
 cmp: FORCE $(ORIGINALS)
-	
+
 org/%.$(OEXT): res/%.$(OEXT)
+	echo $<
 	@diff -s $< $@
 
 $(EXECUTABLE): $(OBJECTS)

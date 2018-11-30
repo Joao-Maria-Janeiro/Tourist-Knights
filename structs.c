@@ -179,6 +179,10 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
           st[toInsert[i].point.x*(map->columns)+toInsert[i].point.y] = currentPoint;
           toInsert[i].Weight = wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y];
           //Add the adjacencies one by one to the heap
+          if(heapSize >= allocatedHeapSize) {
+            acervo = (Node *)realloc(acervo, (allocatedHeapSize +100) * sizeof(Node));
+            allocatedHeapSize+=100;
+          }
           add(toInsert[i], acervo, &heapSize, &allocatedHeapSize);
           count++;
         }
