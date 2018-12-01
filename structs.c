@@ -4,7 +4,7 @@
 #include "structs.h"
 #include "heap.h"
 
-#define INFINIY 2147483647
+#define INFINITY 2147483647
 
 /* horseJump()
 *  Checking if 2 points are connected by a horse jump
@@ -170,7 +170,7 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
     Node *toInsert= NULL;
     //We get the smallest value from the heap removing it from the array
     currentPoint = pop(&heapSize ,acervo).point;
-    if(wt[currentPoint.x * (map->columns) + currentPoint.y] != INFINIY){ //Check if the point hasn't been visited yet
+    if(wt[currentPoint.x * (map->columns) + currentPoint.y] != INFINITY){ //Check if the point hasn't been visited yet
       // We get all the adjacencies of the current point
       toInsert = allHorseJumps(map, currentPoint.x, currentPoint.y, &toInsertSize);
       for(int i=0; i<toInsertSize; i++) {
@@ -231,7 +231,7 @@ Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FI
 
 
 
-void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout){
+void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, int printFlag){
   Point empty;
   empty.x = -1;
   empty.y = -1;
@@ -241,7 +241,7 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout){
   Point * array = (Point *)malloc( sizeof(Point));
   for(int i = 0; i < map->numPoints - 1; i++){
     for(int j = 0; j < (map->columns * map->lines); j++){
-      wt[j] = INFINIY;
+      wt[j] = INFINITY;
       st[j] = empty;
     }
     if(horseJump(map->points[i], map->points[i+1])) {
@@ -259,19 +259,26 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout){
     }
   }
 
-  //Print the header
-  fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, size);
-  for(int j=0; j < map->numPoints-1; j++) {
-    for(int i=counts[j]-1; i>=0; i--) {
-      fprintf(fout, "%d %d %d\n", aux[j][i].x, aux[j][i].y, map->map[aux[j][i].x][aux[j][i].y]); //Print the path
+  (*tmpCost) = cost;
+
+  if(printFlag == 1) {
+    //Print the header
+    fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, size);
+    for(int j=0; j < map->numPoints-1; j++) {
+      for(int i=counts[j]-1; i>=0; i--) {
+        fprintf(fout, "%d %d %d\n", aux[j][i].x, aux[j][i].y, map->map[aux[j][i].x][aux[j][i].y]); //Print the path
+      }
     }
   }
+
+
   free(array);
   free(counts);
   for(int i=0; i<map->numPoints - 1; i++) {
     free(aux[i]);
   }
   free(aux);
+
 }
 
 // void printWalk(Point ** st, Point initial, Point tmp, FILE *fout, int * count) {
@@ -286,3 +293,52 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout){
 //   fprintf(fout, "(%d %d)\n", tmp.x, tmp.y);
 //
 // }
+
+void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
+  //TODO generate a permutation of array elements
+  //TODO run dijkstraB in that array
+  //TODO check if the cost is smaller than the current cost
+    //TODO if it is update current cost
+    //TODO save the st array
+    //TODO else continue
+  //TODO after finding the smallest cost generate file with the header and steps
+  Point * bestPermutation = (Point *)malloc(sizeof(Point) * map->numPoints);
+
+  int minCost = INFINITY;
+  int tmpCost = INFINITY;
+
+  permute(map, st, wt, fout, map->points, 1, &minCost, &tmpCost, bestPermutation);
+
+  djikstraTypeB(map, st, wt, fout, &tmpCost, 1);
+
+}
+
+void swapPoints(Point *point1, Point *point2) {
+    Point tmp = *point1;
+    *point1 = *point2;
+    *point2 = tmp;
+}
+
+void permute(Map * map, Point *st, int * wt, FILE * fout, Point *array, int i, int *minCost, int *tmpCost, Point * bestPermutation) {
+
+  if (map->numPoints == i){
+    djikstraTypeB(map, st, wt, fout, tmpCost, 2);
+    if(*tmpCost < *minCost) {
+      *minCost = *tmpCost;
+      for(int i=0; i<map->numPoints; i++) {
+        bestPermutation[i] = map->points[i];
+      }
+    }
+
+   return;
+  }
+
+  int j = i;
+
+  for (j = i; j < map->numPoints; j++) {
+   swapPoints(array+i,array+j);
+   permute(map, st, wt, fout, array,i+1, minCost, tmpCost, bestPermutation);
+   swapPoints(array+i,array+j);
+  }
+  return;
+}

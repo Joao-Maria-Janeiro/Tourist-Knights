@@ -123,7 +123,7 @@ void readFromFile(char * file_name) {
             break;
             case 'B':
               if(verifyPoints(map, numPoints)) {
-                djikstraTypeB(map, st, wt, fout);
+                djikstraTypeB(map, st, wt, fout, &lixinho, 1);
               }else {
                 fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
               }
@@ -132,6 +132,15 @@ void readFromFile(char * file_name) {
               freeMap(map, map->lines);
             break;
             case 'C':
+             djikstraTypeC(map, st, wt, fout);
+              // if(verifyPoints(map, numPoints)) {
+              //   djikstraTypeC(map, st, wt, fout);
+              // }else {
+              //   fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+              // }
+              // free(st);
+              // free(wt);
+              // freeMap(map, map->lines);
             break;
           }
         }
@@ -172,13 +181,13 @@ int verifyPoints(Map *map, int numPoints) {
 }
 
 int verifyMap(int lines, int columns, char objective, int numPoints) {
-  if(objective != 'A'  && objective != 'B'){
+  if(objective != 'A'  && objective != 'B' && objective != 'C'){
     return 0;
   }
   if(objective == 'A' && numPoints != 2) {
     return 0;
   }
-  if(objective == 'B' && numPoints < 2){
+  if((objective == 'B' || objective == 'C') && numPoints < 2){
     return 0;
   }
   return 1;

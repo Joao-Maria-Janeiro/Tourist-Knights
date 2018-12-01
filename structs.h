@@ -42,6 +42,10 @@ int horseJump(Point , Point );
 Node * allHorseJumps(Map *, int , int , int *);
 int checkPlay(int , int , int , int , Map *);
 Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * wt, FILE * fout, int *_count);
-void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout);
+void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int *tmpCost, int printFlag);
 Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FILE *fout, int * _count);
+void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout);
+void permute(Map * map, Point *st, int * wt, FILE * fout, Point *array, int i, int *minCost, int *tmpCost, Point* bestPermutation);
+void swapPoints(Point *point1, Point *point2);
+
 #endif
