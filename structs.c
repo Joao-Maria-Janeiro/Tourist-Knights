@@ -209,7 +209,7 @@ Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FI
 
   //Iterate through the array in inverse order to count the points and add them to the array
   while(!((tmp.x == initial.x) && (tmp.y == initial.y))){
-    if(count > arraySize){
+    if(count >= arraySize){
       array = (Point *)realloc(array, (arraySize + 100)*sizeof(Point));
       arraySize += 100;
     }
@@ -240,10 +240,6 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, 
   Point ** aux = (Point **)malloc((map->numPoints - 1) * sizeof(Point *));
   Point * array = (Point *)malloc( sizeof(Point));
   for(int i = 0; i < map->numPoints - 1; i++){
-    for(int j = 0; j < (map->columns * map->lines); j++){
-      wt[j] = INFINITY;
-      st[j] = empty;
-    }
     if(horseJump(map->points[i], map->points[i+1])) {
       aux[i] = (Point*)malloc(sizeof(Point));
       aux[i][0] = map->points[i+1];
@@ -252,6 +248,10 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, 
       size += count;
       cost += map->map[map->points[i+1].x][map->points[i+1].y];
     }else {
+      for(int j = 0; j < (map->columns * map->lines); j++){
+        wt[j] = INFINITY;
+        st[j] = empty;
+      }
       aux[i] = djikstraTypeA(map, map->points[i], map->points[i+1], st, wt, fout, &count);
       counts[i] = count;
       size += count;
@@ -259,17 +259,22 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, 
     }
   }
 
+
   (*tmpCost) = cost;
 
+
   if(printFlag == 1) {
-    //Print the header
-    fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, size);
-    for(int j=0; j < map->numPoints-1; j++) {
-      for(int i=counts[j]-1; i>=0; i--) {
-        fprintf(fout, "%d %d %d\n", aux[j][i].x, aux[j][i].y, map->map[aux[j][i].x][aux[j][i].y]); //Print the path
+      if(cost > 0){
+      //Print the header
+      fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, size);
+      for(int j=0; j < map->numPoints-1; j++) {
+        for(int i=counts[j]-1; i>=0; i--) {
+          fprintf(fout, "%d %d %d\n", aux[j][i].x, aux[j][i].y, map->map[aux[j][i].x][aux[j][i].y]); //Print the path
+        }
       }
     }
   }
+
 
 
   free(array);
@@ -295,13 +300,6 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, 
 // }
 
 void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
-  //TODO generate a permutation of array elements
-  //TODO run dijkstraB in that array
-  //TODO check if the cost is smaller than the current cost
-    //TODO if it is update current cost
-    //TODO save the st array
-    //TODO else continue
-  //TODO after finding the smallest cost generate file with the header and steps
   Point * bestPermutation = (Point *)malloc(sizeof(Point) * map->numPoints);
 
   int minCost = INFINITY;
