@@ -33,9 +33,12 @@ typedef struct node{
   int Weight;
 }Node;
 
-typedef struct Struct_adjacencias {
-  Node * adjacencia;
-  struct Struct_adjacencias * next;
+typedef struct adjacencias{
+  Point initPoint;
+  Point finalPoint;
+  Point * path;
+  int pathCost;
+  int pathSize;
 }Adjacencias;
 
 int horseJump(Point , Point );
@@ -45,7 +48,7 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
 void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int *tmpCost, int printFlag);
 Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FILE *fout, int * _count);
 void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout);
-void permute(Map * map, Point *st, int * wt, FILE * fout, Point *array, int i, int *minCost, int *tmpCost, Point* bestPermutation);
-void swapPoints(Point *point1, Point *point2);
+int* permute(int N, Adjacencias ** adj, int * permutation, int i, int * actualCost, Map * map, int* bestPermutation);
+void swapPoints(int *point1, int *point2);
 
 #endif

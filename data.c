@@ -113,6 +113,7 @@ void readFromFile(char * file_name) {
                   for(int i=count -1; i>=0; i--) {
                     fprintf(fout, "%d %d %d\n", toPrint[i].x, toPrint[i].y, map->map[toPrint[i].x][toPrint[i].y]); //Print the path
                   }
+                  free(toPrint);
                 }
               }else {
                 fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
@@ -132,7 +133,7 @@ void readFromFile(char * file_name) {
               freeMap(map, map->lines);
             break;
             case 'C':
-             djikstraTypeC(map, st, wt, fout);
+              djikstraTypeC(map, st, wt, fout);
               // if(verifyPoints(map, numPoints)) {
               //   djikstraTypeC(map, st, wt, fout);
               // }else {

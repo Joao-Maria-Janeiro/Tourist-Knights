@@ -42,7 +42,7 @@ org/%.$(OEXT): res/%.$(OEXT)
 	@diff -s $< $@
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJECTS)
+	$(CC) $(CFLAGS) *.c -o $(EXECUTABLE) $(OBJECTS)
 
 bin/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
