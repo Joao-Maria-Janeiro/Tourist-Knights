@@ -49,6 +49,8 @@ void readFromFile(char * file_name) {
     if(verifyMap(lines, columns, objective, numPoints) == 0){
       //We verify if the map is valid and, if so, assing 0 to validMap
       validMap = -1;
+      fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+      fprintf(fout, "\n");
     }
     //read all points
     if(validMap != -1){
@@ -133,25 +135,27 @@ void readFromFile(char * file_name) {
               freeMap(map, map->lines);
             break;
             case 'C':
-              djikstraTypeC(map, st, wt, fout);
-              // if(verifyPoints(map, numPoints)) {
-              //   djikstraTypeC(map, st, wt, fout);
-              // }else {
-              //   fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
-              // }
-              // free(st);
-              // free(wt);
-              // freeMap(map, map->lines);
+              if(verifyPoints(map, numPoints)) {
+                djikstraTypeC(map, st, wt, fout);
+              }else {
+                fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+              }
+              free(st);
+              free(wt);
+              freeMap(map, map->lines);
             break;
           }
         }
       fprintf(fout, "\n");
     }else{
       //Move the pointer to the end of the map
-      while(fgets(linha, 4, fp) != NULL) {
-        //Move pointer until a empty line
-        if(*linha == '\n')
-          break;
+      for(int i=0; i<numPoints*2; i++) {
+        lixinho = fscanf(fp, "%d ", &lixinho);
+      }
+      for(int i=0; i<lines; i++) {
+        for(int x=0; x<columns; x++) {
+          lixinho = fscanf(fp, "%d ", &lixinho);
+        }
       }
     }
   }

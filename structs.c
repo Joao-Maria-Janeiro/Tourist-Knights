@@ -207,12 +207,6 @@ Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FI
 
   *_count = count;
   return array;
-  //
-  // //Print the header
-  // fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[final.x * (map->columns) + final.y], count);
-  // for(int i=count-1; i>=0; i--) {
-  //   fprintf(fout, "%d %d %d\n", array[i].x, array[i].y, map->map[array[i].x][array[i].y]); //Print the path
-  // }
 }
 
 
@@ -326,6 +320,7 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
       adj[i][j].path = (Point*)malloc(count * sizeof(Point));
       for(int x=count -1; x>=0; x--) {
         adj[i][j].path[x] = dijkstraPath[x];
+        // printf("VER AQUI: %d %d - %d\n", i, j, dijkstraPath[x].x);
       }
       adj[i][j].pathSize =  count;
       adj[i][j].pathCost = wt[map->points[j].x * (map->columns) + map->points[j].y];
@@ -334,7 +329,7 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
     }
   }
 
-
+    //printf("VER AGORA: %d\n", adj[0][1].path[].x);
   for(int i = 0; i < map->numPoints; i++){
     permutation[i] = i;
   }
@@ -356,6 +351,9 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
     }
   }
 
+  printf("VALOR: %d\n", map->map[adj[0][1].finalPoint.x][adj[0][1].finalPoint.y]);
+  printf("MAPA: %d\n", adj[0][1].path[0].x);
+
   //Print the output file header
   fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, totalSteps);
 
@@ -370,11 +368,18 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
       }
     }else{
       for(int j = adj[bestPermutation[i]][bestPermutation[i+1]].pathSize - 1; j >= 0 ; j--){
-        fprintf(fout, "%d %d %d\n", adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x, adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y, map->map[adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x][adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y]);
-
+        if(j == 0){
+          fprintf(fout, "%d %d %d\n", adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.x, adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.y, map->map[adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.x][adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.y]);
+        }else{
+          fprintf(fout, "%d %d %d\n", adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x, adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y, map->map[adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x][adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y]);
+        }
       }
     }
   }
+
+  // free(permutation);
+  // free(bestPermutation);
+
 
 }
 
