@@ -201,7 +201,7 @@ Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FI
     }
     count++;
     tmp = st[tmp.x * (map->columns) + tmp.y];
-    array[count] = tmp;
+    array[count-1] = tmp;
   }
 
   *_count = count;
@@ -324,15 +324,23 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
       }
       count = 0;
       dijkstraPath = djikstraTypeA(map, map->points[i], map->points[j], st, wt, fout, &count);
-      adj[i][j].path = (Point*)malloc((count+1) * sizeof(Point));
-      for(int x=count -1; x>=0; x--) {
-        adj[i][j].path[x] = dijkstraPath[x];
-        // printf("VER AQUI: %d %d - %d\n", i, j, dijkstraPath[x].x);
+      if(count != 0) {
+        adj[i][j].path = (Point*)malloc((count+1) * sizeof(Point));
+        for(int x=count -1; x>=0; x--) {
+          adj[i][j].path[x] = dijkstraPath[x];
+        }
+        adj[i][j].pathSize =  count;
+        adj[i][j].pathCost = wt[map->points[j].x * (map->columns) + map->points[j].y];
+        adj[i][j].initPoint = map->points[i];
+        adj[i][j].finalPoint = map->points[j];
+      }else {
+        adj[i][j].pathSize =  0;
+        adj[i][j].pathCost = 0;
+        adj[i][j].initPoint = map->points[i];
+        adj[i][j].finalPoint = map->points[j];
+        printf("%d %d    %d %d", map->points[i].x, map->points[i].y, map->points[j].x, map->points[j].y);
       }
-      adj[i][j].pathSize =  count;
-      adj[i][j].pathCost = wt[map->points[j].x * (map->columns) + map->points[j].y];
-      adj[i][j].initPoint = map->points[i];
-      adj[i][j].finalPoint = map->points[j];
+
     }
   }
 
@@ -357,23 +365,33 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
     }
   }
   //Print the output file header
+
   fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, totalSteps);
+  printf("Linha 362\n");
 
   for(int i = 0; i < map->numPoints - 1; i++){
     if(bestPermutation[i] > bestPermutation[i+1]){
       for(int j = 1; j <= adj[bestPermutation[i + 1]][bestPermutation[i]].pathSize ; j++){
         if(j == adj[bestPermutation[i + 1]][bestPermutation[i]].pathSize){
+          printf("Linha 366\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.x, adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.y, map->map[adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.x][adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.y]);
+          printf("Linha 368\n");
         }else {
+          printf("Linha 370\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i+1]][bestPermutation[i]].path[j].x, adj[bestPermutation[i+1]][bestPermutation[i]].path[j].y, map->map[adj[bestPermutation[i+1]][bestPermutation[i]].path[j].x][adj[bestPermutation[i+1]][bestPermutation[i]].path[j].y]);
+          printf("Linha 372\n");
         }
       }
     }else{
       for(int j = adj[bestPermutation[i]][bestPermutation[i+1]].pathSize - 1; j >= 0 ; j--){
         if(j == 0){
+          printf("Linha 374\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.x, adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.y, map->map[adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.x][adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.y]);
+          printf("Linha 376\n");
         }else{
+          printf("Linha 378\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x, adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y, map->map[adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x][adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y]);
+          printf("Linha 380\n");
         }
       }
     }
@@ -381,7 +399,7 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
 
   free(permutation);
   free(bestPermutation);
-
+  free(dijkstraPath);
 
 }
 
