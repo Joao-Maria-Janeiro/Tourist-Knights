@@ -1,8 +1,6 @@
 #ifndef _STRUCTS_H
 #define _STRUCTS_H
 
-#include "defs.h"
-
 typedef struct point {
   int x;
   int y;

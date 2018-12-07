@@ -2,7 +2,7 @@
 CC = gcc
 
 #flags for individual object file compilation
-CFLAGS = -Wall -std=c99 -g
+CFLAGS = -Wall -std=c99 -O3
 #RELEASE
 # -Wall -std=c99 -O3
 #DEVELOPMENT
@@ -48,7 +48,6 @@ bin/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm bin/*.o $(EXECUTABLE)
-	rm res/*.$(OEXT)
+	rm $(EXECUTABLE)
 
 FORCE:

@@ -9,16 +9,12 @@
 
 
 void readFromFile(char * file_name) {
-  Node *heap = NULL;
-  int heapSize=0, allocatedHeapSize=0;
   int count = 0;
   Point * toPrint = NULL;
   //create necessary variables
-  int lineCounter = 0, lines=0, columns=0, numPoints=0, validMap = 0, i = 0, j = 0, lixinho = 0, numLines = 0;
+  int lines=0, columns=0, numPoints=0, validMap = 0, i = 0, j = 0, lixinho = 0, numLines = 0;
   char objective = '0';
-  char linha[4];
   Map * map = NULL;
-  Adjacencias * pointsVector;
   //read all the map info
   FILE * fp;
   fp = fopen(file_name, "r");
@@ -77,10 +73,10 @@ void readFromFile(char * file_name) {
             }
           }
           //Move the pointer to the end of the map
-          while(fgets(linha, 4, fp) != NULL) {
-            //Move pointer until a empty line
-            if(*linha == '\n')
-              break;
+          for(int i=numLines; i<lines; i++) {
+            for(int x=0; x<columns; x++) {
+              lixinho = fscanf(fp, "%d ", &lixinho);
+            }
           }
           fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, map->map[map->points[1].x][map->points[1].y], 1);
           fprintf(fout, "%d %d %d\n", map->points[1].x, map->points[1].y, map->map[map->points[1].x][map->points[1].y]);
@@ -135,11 +131,12 @@ void readFromFile(char * file_name) {
               freeMap(map, map->lines);
             break;
             case 'C':
-              if(verifyPoints(map, numPoints)) {
-                djikstraTypeC(map, st, wt, fout);
-              }else {
-                fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
-              }
+              //NÃO APAGAR    !!!
+              // if(verifyPoints(map, numPoints)) {
+              //   djikstraTypeC(map, st, wt, fout);
+              // }else {
+              //   fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+              // }
               free(st);
               free(wt);
               freeMap(map, map->lines);
@@ -178,6 +175,9 @@ void freeMap(Map* map, int lines) {
 */
 int verifyPoints(Map *map, int numPoints) {
   for(int i=0; i<numPoints; i++) {
+    if(map->points[i].x < 0 || map->points[i].y < 0 || map->points[i].y >= map->columns || map->points[i].x >= map->lines) {
+      return 0;
+    }
     if(map->map[map->points[i].x][map->points[i].y] == 0) {
       return 0;
     }
@@ -199,7 +199,6 @@ int verifyMap(int lines, int columns, char objective, int numPoints) {
 }
 
 void allocatePoints(Map * newMap, int lines, int columns, char objective, int numPoints){
-  int i = 0;
   newMap->numPoints = numPoints;
   newMap->lines = lines;
   newMap->columns = columns;

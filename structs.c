@@ -29,7 +29,6 @@ Node * allHorseJumps(Map * map, int x, int y, int *size) {
   Node * array = (Node *)malloc(8 * sizeof(Node));
   int cost = 1000;
   int tmp = 0;
-  int isZero = 0;
 
   (*size) = 0;
 
@@ -177,7 +176,8 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
     }
   }
   free(acervo);
-  if((currentPoint.x != final.x && currentPoint.y != final.y) || heapSize == 0){
+  if((currentPoint.x != final.x && currentPoint.y != final.y)){
+    printf("CHEGOU\n");
     fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
     *_count = -1;
     return NULL;
@@ -228,12 +228,22 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, 
       counts[i] = count;
       size += count;
       cost += map->map[map->points[i+1].x][map->points[i+1].y];
-    }else {
+    }else if(map->points[i].x == map->points[i+1].x && map->points[i].y == map->points[i+1].y) {
+      aux[i] = (Point*)malloc(sizeof(Point));
+      aux[i][0] = map->points[i+1];
+      count = 0;
+      counts[i] = count;
+      size += count;
+      cost += 0;
+    } else {
       for(int j = 0; j < (map->columns * map->lines); j++){
         wt[j] = INFINITY;
         st[j] = empty;
       }
       aux[i] = djikstraTypeA(map, map->points[i], map->points[i+1], st, wt, fout, &count);
+      if(count == -1) {
+        printFlag = 2;
+      }
       counts[i] = count;
       size += count;
       cost += wt[map->points[i+1].x * (map->columns) + map->points[i+1].y];
@@ -245,12 +255,12 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, 
 
 
   if(printFlag == 1) {
-      if(cost > 0){
+      if(cost >= 0){
       //Print the header
       fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, size);
       for(int j=0; j < map->numPoints-1; j++) {
         for(int i=counts[j]-1; i>=0; i--) {
-          fprintf(fout, "%d %d %d\n", aux[j][i].x, aux[j][i].y, map->map[aux[j][i].x][aux[j][i].y]); //Print the path
+            fprintf(fout, "%d %d %d\n", aux[j][i].x, aux[j][i].y, map->map[aux[j][i].x][aux[j][i].y]); //Print the path
         }
       }
     }
@@ -284,8 +294,6 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
   Point empty;
   empty.x = -1;
   empty.y = -1;
-  int minCost = INFINITY;
-  int tmpCost = INFINITY;
   int totalSteps = 0;
 
   int * bestPermutation = NULL;
@@ -317,7 +325,7 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
       }
       count = 0;
       dijkstraPath = djikstraTypeA(map, map->points[i], map->points[j], st, wt, fout, &count);
-      adj[i][j].path = (Point*)malloc(count * sizeof(Point));
+      adj[i][j].path = (Point*)malloc((count+1) * sizeof(Point));
       for(int x=count -1; x>=0; x--) {
         adj[i][j].path[x] = dijkstraPath[x];
         // printf("VER AQUI: %d %d - %d\n", i, j, dijkstraPath[x].x);
@@ -339,7 +347,6 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
 
   bestPermutation = permute(map->numPoints, adj, permutation, 1, &finalCost, map, bestPermutation);
 
-
   int cost = 0;
   for(int i = 0; i < map->numPoints-1; i++){
     if(bestPermutation[i] > bestPermutation[i+1]){
@@ -350,10 +357,6 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
       cost += adj[bestPermutation[i]][bestPermutation[i+1]].pathCost;
     }
   }
-
-  printf("VALOR: %d\n", map->map[adj[0][1].finalPoint.x][adj[0][1].finalPoint.y]);
-  printf("MAPA: %d\n", adj[0][1].path[0].x);
-
   //Print the output file header
   fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, totalSteps);
 
@@ -377,8 +380,8 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
     }
   }
 
-  // free(permutation);
-  // free(bestPermutation);
+  free(permutation);
+  free(bestPermutation);
 
 
 }
@@ -402,7 +405,6 @@ int* permute(int N, Adjacencias ** adj, int * array, int i, int *actualCost, Map
       }
     }
 
-    int counter = 0;
     if(cost < *actualCost){
       *actualCost = cost;
       for(int i = 0; i < N; i++){
