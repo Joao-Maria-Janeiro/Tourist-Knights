@@ -19,7 +19,6 @@ void readFromFile(char * file_name) {
   FILE * fp;
   fp = fopen(file_name, "r");
   if(fp == NULL) {
-    printf("Error opening file\n");
     exit(0);
   }
 
@@ -35,7 +34,6 @@ void readFromFile(char * file_name) {
 
   FILE *fout = fopen(outfile_name, "w");
   if(fout == NULL){
-    printf("Error opening output file\n");
     exit(0);
   }
 

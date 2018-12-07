@@ -177,7 +177,6 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
   }
   free(acervo);
   if((currentPoint.x != final.x && currentPoint.y != final.y)){
-    printf("CHEGOU\n");
     fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
     *_count = -1;
     return NULL;
