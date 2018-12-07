@@ -312,7 +312,7 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
 
 
   for(int i=0; i<map->numPoints -1; i++) {
-    adj[i] = (Adjacencias*)malloc((map->numPoints -1) * sizeof(Adjacencias));
+    adj[i] = (Adjacencias*)malloc((map->numPoints) * sizeof(Adjacencias));
   }
   Point * dijkstraPath = NULL;
   for(int i = 0; i < map->numPoints - 1; i++){
@@ -327,7 +327,6 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
       adj[i][j].path = (Point*)malloc((count+1) * sizeof(Point));
       for(int x=count -1; x>=0; x--) {
         adj[i][j].path[x] = dijkstraPath[x];
-        // printf("VER AQUI: %d %d - %d\n", i, j, dijkstraPath[x].x);
       }
       adj[i][j].pathSize =  count;
       adj[i][j].pathCost = wt[map->points[j].x * (map->columns) + map->points[j].y];
@@ -336,7 +335,6 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
     }
   }
 
-    //printf("VER AGORA: %d\n", adj[0][1].path[].x);
   for(int i = 0; i < map->numPoints; i++){
     permutation[i] = i;
   }
@@ -381,6 +379,10 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
 
   free(permutation);
   free(bestPermutation);
+  for(int i = 0; i < map->numPoints - 1; i++) {
+    free(adj[i]);
+  }
+  free(adj);
 
 
 }

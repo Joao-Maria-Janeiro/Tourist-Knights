@@ -129,12 +129,11 @@ void readFromFile(char * file_name) {
               freeMap(map, map->lines);
             break;
             case 'C':
-              //NÃO APAGAR    !!!
-              // if(verifyPoints(map, numPoints)) {
-              //   djikstraTypeC(map, st, wt, fout);
-              // }else {
-              //   fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
-              // }
+              if(verifyPoints(map, numPoints)) {
+                djikstraTypeC(map, st, wt, fout);
+              }else {
+                fprintf(fout, "%d %d %c %d %d %d\n", lines, columns, objective, numPoints, -1, 0);
+              }
               free(st);
               free(wt);
               freeMap(map, map->lines);
