@@ -96,7 +96,6 @@ Node pop(int *size, Node * items){
 }
 
 void add(Node item, Node * items, int *size, int *allocatedSize){
-  //TODO allocate memmory or maybe do some other implementation that instead of reallocing 1 by 1 just allocs like 50/100 and then only reallocs if those are full and then it would realloc after
   items[*size] = item;
   (*size)++;
   heapifyUp(*size, items);

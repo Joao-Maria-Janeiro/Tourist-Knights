@@ -140,7 +140,6 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
   Point currentPoint;
   Node * acervo = (Node *)malloc(100 * sizeof(Node));
   st[initial.x * (map->columns) + initial.y] = initial;
-  //wt[initial.x][initial.y] = 0;
   wt[initial.x * (map->columns) + initial.y] = 0;
   currentPoint.x = initial.x;
   currentPoint.y = initial.y;
@@ -194,14 +193,14 @@ Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FI
   array[count] = final;
 
   //Iterate through the array in inverse order to count the points and add them to the array
-  while(!((tmp.x == initial.x) && (tmp.y == initial.y))){
+  while(!((tmp.x == initial.x) && (tmp.y == initial.y)) ){
     if(count >= arraySize){
       array = (Point *)realloc(array, (arraySize + 100)*sizeof(Point));
       arraySize += 100;
     }
     count++;
     tmp = st[tmp.x * (map->columns) + tmp.y];
-    array[count-1] = tmp;
+    array[count] = tmp;
   }
 
   *_count = count;
@@ -276,19 +275,6 @@ void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int * tmpCost, 
 
 }
 
-// void printWalk(Point ** st, Point initial, Point tmp, FILE *fout, int * count) {
-//   if(((tmp.x == initial.x) && (tmp.y == initial.y))) {
-//     (*count)++;
-//     return;
-//   }
-//   if(*count == 0){
-//     fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[final.x][final.y], (*count));
-//   }
-//   printWalk(st, initial, st[tmp.x][tmp.y], &count);
-//   fprintf(fout, "(%d %d)\n", tmp.x, tmp.y);
-//
-// }
-
 void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
   Point empty;
   empty.x = -1;
@@ -297,101 +283,85 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
 
   int * bestPermutation = NULL;
 
-  int factorial = 1;
-
   int finalCost = INFINITY;
 
 
-  for(int i = 1; i < map->numPoints; i++){
-    factorial *= i;
-  }
-  int * permutation = (int *)malloc(factorial * sizeof(int));
+  int * permutation = (int *)malloc((map->numPoints - 1) * sizeof(int));
   int count = 0;
 
   Adjacencias ** adj = (Adjacencias **)malloc((map->numPoints -1) * sizeof(Adjacencias*));
 
 
   for(int i=0; i<map->numPoints -1; i++) {
-    adj[i] = (Adjacencias*)malloc((map->numPoints -1) * sizeof(Adjacencias));
+    adj[i] = (Adjacencias*)malloc((map->numPoints) * sizeof(Adjacencias));
   }
   Point * dijkstraPath = NULL;
+
+  //Iterate through all points
   for(int i = 0; i < map->numPoints - 1; i++){
     count = 0;
+    //After each point is done reset st and wt
+    for(int x = 0; x < (map->columns * map->lines); x++){
+      wt[x] = INFINITY;
+      st[x] = empty;
+    }
+    //Iterate through the remaning points in order to get all adjacencies
     for(int j = i + 1; j < map->numPoints; j++){
-      for(int x = 0; x < (map->columns * map->lines); x++){
-        wt[x] = INFINITY;
-        st[x] = empty;
-      }
       count = 0;
-      dijkstraPath = djikstraTypeA(map, map->points[i], map->points[j], st, wt, fout, &count);
-      if(count != 0) {
-        adj[i][j].path = (Point*)malloc((count+1) * sizeof(Point));
-        for(int x=count -1; x>=0; x--) {
-          adj[i][j].path[x] = dijkstraPath[x];
+      if(wt[map->points[j].x * (map->columns) + map->points[j].y] != INFINITY){ // If we already have a cost on the point j coming from the point i we don't need to run dijkstra again, we only need the path
+        dijkstraPath = createWalk(map, st, wt, map->points[i], map->points[j], fout, &count);
+      }else{
+        for(int x = 0; x < (map->columns * map->lines); x++){
+          wt[x] = INFINITY;
+          st[x] = empty;
         }
-        adj[i][j].pathSize =  count;
-        adj[i][j].pathCost = wt[map->points[j].x * (map->columns) + map->points[j].y];
-        adj[i][j].initPoint = map->points[i];
-        adj[i][j].finalPoint = map->points[j];
-      }else {
-        adj[i][j].pathSize =  0;
-        adj[i][j].pathCost = 0;
-        adj[i][j].initPoint = map->points[i];
-        adj[i][j].finalPoint = map->points[j];
-        printf("%d %d    %d %d", map->points[i].x, map->points[i].y, map->points[j].x, map->points[j].y);
+        dijkstraPath = djikstraTypeA(map, map->points[i], map->points[j], st, wt, fout, &count);
       }
-
+      adj[i][j].path = dijkstraPath;
+      adj[i][j].pathSize =  count;
+      adj[i][j].pathCost = wt[map->points[j].x * (map->columns) + map->points[j].y];
+      adj[i][j].initPoint = map->points[i];
+      adj[i][j].finalPoint = map->points[j];
     }
   }
 
-    //printf("VER AGORA: %d\n", adj[0][1].path[].x);
   for(int i = 0; i < map->numPoints; i++){
     permutation[i] = i;
   }
 
-  //Alocacao de memoria para adj[0][0] tem de ser ALTERADA
+  //Memory allocation for the best permutation
   bestPermutation = (int *)malloc(map->numPoints * sizeof(int));
 
-  bestPermutation = permute(map->numPoints, adj, permutation, 1, &finalCost, map, bestPermutation);
+  bestPermutation = permute(map->numPoints, adj, permutation, 1, &finalCost, map, bestPermutation, 0);
 
   int cost = 0;
   for(int i = 0; i < map->numPoints-1; i++){
     if(bestPermutation[i] > bestPermutation[i+1]){
       totalSteps += adj[bestPermutation[i + 1]][bestPermutation[i]].pathSize;
-      cost += adj[bestPermutation[i + 1]][bestPermutation[i]].pathCost - map->map[adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.x][adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.y] + map->map[adj[bestPermutation[i+1]][bestPermutation[i]].finalPoint.x][adj[bestPermutation[i+1]][bestPermutation[i]].finalPoint.y];
+      cost += adj[bestPermutation[i + 1]][bestPermutation[i]].pathCost + map->map[adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.x][adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.y] - map->map[adj[bestPermutation[i+1]][bestPermutation[i]].finalPoint.x][adj[bestPermutation[i+1]][bestPermutation[i]].finalPoint.y];
     }else{
       totalSteps += adj[bestPermutation[i]][bestPermutation[i+1]].pathSize;
       cost += adj[bestPermutation[i]][bestPermutation[i+1]].pathCost;
     }
   }
   //Print the output file header
-
   fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, cost, totalSteps);
-  printf("Linha 362\n");
 
   for(int i = 0; i < map->numPoints - 1; i++){
     if(bestPermutation[i] > bestPermutation[i+1]){
       for(int j = 1; j <= adj[bestPermutation[i + 1]][bestPermutation[i]].pathSize ; j++){
         if(j == adj[bestPermutation[i + 1]][bestPermutation[i]].pathSize){
-          printf("Linha 366\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.x, adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.y, map->map[adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.x][adj[bestPermutation[i+1]][bestPermutation[i]].initPoint.y]);
-          printf("Linha 368\n");
         }else {
-          printf("Linha 370\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i+1]][bestPermutation[i]].path[j].x, adj[bestPermutation[i+1]][bestPermutation[i]].path[j].y, map->map[adj[bestPermutation[i+1]][bestPermutation[i]].path[j].x][adj[bestPermutation[i+1]][bestPermutation[i]].path[j].y]);
-          printf("Linha 372\n");
         }
       }
     }else{
       for(int j = adj[bestPermutation[i]][bestPermutation[i+1]].pathSize - 1; j >= 0 ; j--){
         if(j == 0){
-          printf("Linha 374\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.x, adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.y, map->map[adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.x][adj[bestPermutation[i]][bestPermutation[i+1]].finalPoint.y]);
-          printf("Linha 376\n");
         }else{
-          printf("Linha 378\n");
           fprintf(fout, "%d %d %d\n", adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x, adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y, map->map[adj[bestPermutation[i]][bestPermutation[i+1]].path[j].x][adj[bestPermutation[i]][bestPermutation[i+1]].path[j].y]);
-          printf("Linha 380\n");
         }
       }
     }
@@ -399,7 +369,10 @@ void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout) {
 
   free(permutation);
   free(bestPermutation);
-  free(dijkstraPath);
+  for(int i = 0; i < map->numPoints - 1; i++) {
+    free(adj[i]);
+  }
+  free(adj);
 
 }
 
@@ -410,34 +383,72 @@ void swapPoints(int *point1, int *point2) {
     *point2 = tmp;
 }
 
-int* permute(int N, Adjacencias ** adj, int * array, int i, int *actualCost, Map * map, int* bestPermutation) {
+/*
+*/
 
-  if (N == i){
-    int cost = 0;
-    for(int i = 0; i < N-1; i++){
-      if(array[i] > array[i+1]){
-        cost += adj[array[i + 1]][array[i]].pathCost - map->map[adj[array[i+1]][array[i]].initPoint.x][adj[array[i+1]][array[i]].initPoint.y] + map->map[adj[array[i+1]][array[i]].finalPoint.x][adj[array[i+1]][array[i]].finalPoint.y];
-      }else{
-        cost += adj[array[i]][array[i+1]].pathCost;
-      }
+int * permute(int N, Adjacencias ** adj, int * array, int i, int *bestPermutationCost, Map * map, int* bestPermutation, int cost) {
+  // if (N == i){
+  //     int cost = 0;
+  //     for(int i = 0; i < N-1; i++){
+  //       if(array[i] > array[i+1]){
+  //         cost += adj[array[i + 1]][array[i]].pathCost - map->map[adj[array[i+1]][array[i]].initPoint.x][adj[array[i+1]][array[i]].initPoint.y] + map->map[adj[array[i+1]][array[i]].finalPoint.x][adj[array[i+1]][array[i]].finalPoint.y];
+  //       }else{
+  //         cost += adj[array[i]][array[i+1]].pathCost;
+  //       }
+  //     }
+  //
+  //     if(cost < *actualCost){
+  //       *actualCost = cost;
+  //       memcpy(bestPermutation, array, sizeof(array));
+  //     }
+  //
+  //    return NULL;
+  //   }
+
+  if(i != 1) {
+    printf("ANtes\n");
+    if(array[i-2] > array[i-1]){
+      printf("ENTREI\n");
+      cost += adj[array[i -1]][array[i-2]].pathCost - map->map[adj[array[i-1]][array[i-2]].initPoint.x][adj[array[i-1]][array[i-2]].initPoint.y] + map->map[adj[array[i-1]][array[i-2]].finalPoint.x][adj[array[i-1]][array[i-2]].finalPoint.y];
+      printf("SAI\n");
+    }else{
+      printf("ENTREI1\n");
+      cost += adj[array[i-2]][array[i-1]].pathCost;
+      printf("SAI1\n");
     }
-
-    if(cost < *actualCost){
-      *actualCost = cost;
-      for(int i = 0; i < N; i++){
-        bestPermutation[i] = array[i];
-      }
-    }
-
-   return NULL;
+  }
+  if(cost >= *bestPermutationCost && *bestPermutationCost != INFINITY){
+    return NULL;
   }
 
-  int j = i;
-
-  for (j = i; j < N; j++) {
-   swapPoints(array+i,array+j);
-   permute(N, adj, array, i+1, actualCost, map, bestPermutation);
-   swapPoints(array+i,array+j);
+  if(i == N){
+    printf("ANtes2\n");
+    for(int x = 0; x < N; x++){
+      printf("%d ", array[x]);
+    }
+    printf("\n");
+    if(*bestPermutationCost > cost ) {
+      *bestPermutationCost = cost;
+      printf("HERE\n");
+      memcpy(bestPermutation, array, sizeof(array));
+      printf("OUT\n");
+    }
+    return NULL;
   }
-  return bestPermutation;
+
+
+    for (int j = i; j < N; j++) {
+      if(i == j) {
+        permute(N, adj, array, i+1, bestPermutationCost, map, bestPermutation, cost);
+      } else {
+        printf("ANtes3\n");
+        swapPoints(array+i,array+j);
+        printf("ANtes4\n");
+        permute(N, adj, array, i+1, bestPermutationCost, map, bestPermutation, cost);
+        printf("ANtes5\n");
+        swapPoints(array+i,array+j);
+        printf("ANtes6\n");
+      }
+    }
+    return bestPermutation;
 }

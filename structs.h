@@ -46,7 +46,7 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, int * w
 void djikstraTypeB(Map * map, Point * st, int * wt, FILE * fout, int *tmpCost, int printFlag);
 Point * createWalk(Map *map, Point * st, int *wt, Point initial, Point final, FILE *fout, int * _count);
 void djikstraTypeC(Map * map, Point * st, int * wt, FILE * fout);
-int* permute(int N, Adjacencias ** adj, int * permutation, int i, int * actualCost, Map * map, int* bestPermutation);
+int* permute(int N, Adjacencias ** adj, int * permutation, int i, int * actualCost, Map * map, int* bestPermutation, int j);
 void swapPoints(int *point1, int *point2);
 
 #endif
