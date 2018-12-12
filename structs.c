@@ -352,7 +352,6 @@ void dijkstraC(Map * map, Point initial, Point final, Point * st, unsigned short
           }
           count++;
         }
-        printf("%d\n", heapSize);
       }
       free(toInsert);
     }
@@ -363,19 +362,14 @@ void dijkstraC(Map * map, Point initial, Point final, Point * st, unsigned short
   }
   free(heapPositions);
 
-  printf("SAI\n");
 
   if(passedByPoints(wt, map->points, map->numPoints, map->columns, startingPointIdx) == 0){
-    if(printFlag){
+    if(printFlag)
       fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
-      printf("INVALID\n");
-    }
+
     *_count = -1;
-    printf("SAI#\n");
     return;
   }
-
-  printf("SAI@\n");
 
   return;
 }
@@ -421,7 +415,8 @@ void djikstraTypeC(Map * map, Point * st, unsigned short * wt, FILE * fout) {
           st[x] = empty;
         }
         dijkstraC(map, map->points[i], map->points[j], st, wt, fout, &count, 0, i);
-        dijkstraPath = createWalk(map, st, wt, map->points[i], map->points[j], fout, &count);
+        if(count != -1)
+          dijkstraPath = createWalk(map, st, wt, map->points[i], map->points[j], fout, &count);
       }
       adj[i][j].path = dijkstraPath;
       adj[i][j].pathSize =  count;
@@ -433,13 +428,14 @@ void djikstraTypeC(Map * map, Point * st, unsigned short * wt, FILE * fout) {
 
   int cost = 0;
   int valid = 0;
-  for (int i = 0; i < i<map->numPoints -1; i++) {
+  for (int i = 0; i < map->numPoints -1; i++) {
     for (int j = i + 1; j < map->numPoints; j++) {
       if(adj[i][j].pathSize != -1){
         valid = 1;
       }
     }
   }
+
 
   if(valid == 1){
     for(int i = 0; i < map->numPoints; i++){
@@ -489,15 +485,15 @@ void djikstraTypeC(Map * map, Point * st, unsigned short * wt, FILE * fout) {
     fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
   }
 
-  free(permutation);
-  free(bestPermutation);
-  for(int i = 0; i < map->numPoints - 1; i++) {
-    for(int j = i + 1; j < map->numPoints; j++){
-      free(adj[i][j].path);
-    }
-    free(adj[i]);
-  }
-  free(adj);
+  // free(permutation);
+  // free(bestPermutation);
+  // for(int i = 0; i < map->numPoints - 1; i++) {
+  //   for(int j = i + 1; j < map->numPoints; j++){
+  //     free(adj[i][j].path);
+  //   }
+  //   free(adj[i]);
+  // }
+  // free(adj);
 }
 
 
