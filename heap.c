@@ -74,24 +74,24 @@ void swapC(int index1, int index2, Node * items, int** heapPositions){
 }
 
 Node pop(int *size, Node * items){
-  if(*size == 0){
-    //Talvez tenha de ser alterado, o retorno tem de ser um node que valha "NULL"
+  if(*size == 0){ //Caso em que o acervo está vazio damos return de -1
     Node empty;
     empty.point.x=-1;
     empty.point.y=-1;
     empty.Weight = INT_MAX;
     return empty;
   }else{
+    //Removemos o elemento de maior prioridade e ajustamos o acervo
     Node item = items[0];
     items[0] = items[*size - 1];
     (*size)--;
-    //TODO maybe remove the element from the array, do a realloc? or a new malloc
     heapifyDown(*size, items);
     return item;
   }
 }
 
 void add(Node item, Node * items, int *size, int *allocatedSize){
+  //Adicionar no último elemento do acervo
   items[*size] = item;
   (*size)++;
   heapifyUp(*size, items);
@@ -124,7 +124,6 @@ void heapifyDown(int size, Node * items){
 
 Node popC(int *size, Node * items, int** heapPositions){
   if(*size == 0){
-    //Talvez tenha de ser alterado, o retorno tem de ser um node que valha "NULL"
     Node empty;
     empty.point.x=-1;
     empty.point.y=-1;
@@ -134,7 +133,6 @@ Node popC(int *size, Node * items, int** heapPositions){
     Node item = items[0];
     items[0] = items[*size - 1];
     (*size)--;
-    //TODO maybe remove the element from the array, do a realloc? or a new malloc
     heapifyDownC(*size, items, heapPositions);
     return item;
   }

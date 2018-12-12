@@ -175,6 +175,7 @@ Point * djikstraTypeA(Map * map, Point initial, Point final, Point * st, unsigne
     }
   }
   free(acervo);
+  //If the final point was not removed from the heap, there is no path between the two points
   if((currentPoint.x != final.x && currentPoint.y != final.y)){
     if(printFlag)
       fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
@@ -220,6 +221,7 @@ void djikstraTypeB(Map * map, Point * st, unsigned short * wt, FILE * fout, int 
   Point ** aux = (Point **)malloc((map->numPoints - 1) * sizeof(Point *));
   Point * array = (Point *)malloc( sizeof(Point));
   for(int i = 0; i < map->numPoints - 1; i++){
+    //Check if the points can be connected with only one horse jump
     if(horseJump(map->points[i], map->points[i+1])) {
       aux[i] = (Point*)malloc(sizeof(Point));
       aux[i][0] = map->points[i+1];
@@ -227,6 +229,7 @@ void djikstraTypeB(Map * map, Point * st, unsigned short * wt, FILE * fout, int 
       counts[i] = count;
       size += count;
       cost += map->map[map->points[i+1].x][map->points[i+1].y];
+      //Check if the next point is the same as the current point, so we don't have move
     }else if(map->points[i].x == map->points[i+1].x && map->points[i].y == map->points[i+1].y) {
       aux[i] = (Point*)malloc(sizeof(Point));
       aux[i][0] = map->points[i+1];
@@ -234,6 +237,7 @@ void djikstraTypeB(Map * map, Point * st, unsigned short * wt, FILE * fout, int 
       counts[i] = count;
       size += count;
       cost += 0;
+      //If none of the above conditions are met simply run a Dijkstra to find the path between the two points
     } else {
       for(int j = 0; j < (map->columns * map->lines); j++){
         wt[j] = INFINITY;
@@ -252,7 +256,7 @@ void djikstraTypeB(Map * map, Point * st, unsigned short * wt, FILE * fout, int 
 
   (*tmpCost) = cost;
 
-
+  //Print the result to the file
   if(printFlag == 1) {
       if(cost >= 0){
       //Print the header
@@ -276,7 +280,9 @@ void djikstraTypeB(Map * map, Point * st, unsigned short * wt, FILE * fout, int 
 
 }
 
+
 int passedByPoints(unsigned short * wt, Point * points, int numPoints,int columns, int startingPointIdx){
+  //Iterate through all points and check if they have been passed by
   for(int i = startingPointIdx; i < numPoints; i++) {
     if(wt[points[i].x * columns + points[i].y] == INFINITY) {
       return 0;
@@ -341,13 +347,16 @@ void dijkstraC(Map * map, Point initial, Point final, Point * st, unsigned short
       // We get all the adjacencies of the current point
       toInsert = allHorseJumps(map, currentPoint.x, currentPoint.y, &toInsertSize);
       for(int i=0; i<toInsertSize; i++) {
+        //Check if the adjacencie cost in wt is smaller than the parent cost plus the adjacencie cost in the map
         if(wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y] > wt[currentPoint.x * (map->columns) + currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y]){
           wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y] = wt[currentPoint.x * (map->columns) + currentPoint.y] + map->map[toInsert[i].point.x][toInsert[i].point.y];
           st[toInsert[i].point.x*(map->columns)+toInsert[i].point.y] = currentPoint;
           toInsert[i].Weight = wt[toInsert[i].point.x*(map->columns)+toInsert[i].point.y];
+          //If it's a new point add to the heap
           if(heapPositions[toInsert[i].point.x][toInsert[i].point.y] == -1) {
             addC(toInsert[i], acervo, &heapSize, &allocatedHeapSize, heapPositions);
           }else {
+            //Otherwise simply update it's value
             acervo[heapPositions[toInsert[i].point.x][toInsert[i].point.y]].Weight = toInsert[i].Weight;
           }
           count++;
@@ -362,7 +371,7 @@ void dijkstraC(Map * map, Point initial, Point final, Point * st, unsigned short
   }
   free(heapPositions);
 
-
+  //Check if all the points have been passed by, if not there's no path
   if(passedByPoints(wt, map->points, map->numPoints, map->columns, startingPointIdx) == 0){
     if(printFlag)
       fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
@@ -407,7 +416,8 @@ void djikstraTypeC(Map * map, Point * st, unsigned short * wt, FILE * fout) {
     //Iterate through the remaning points in order to get all adjacencies
     for(int j = i + 1; j < map->numPoints; j++){
       count = 0;
-      if(wt[map->points[j].x * (map->columns) + map->points[j].y] != INFINITY){ // If we already have a cost on the point j coming from the point i we don't need to run dijkstra again, we only need the path
+      // If we already have a cost on the point j coming from the point i we don't need to run dijkstra again, we only need the path
+      if(wt[map->points[j].x * (map->columns) + map->points[j].y] != INFINITY){
         dijkstraPath = createWalk(map, st, wt, map->points[i], map->points[j], fout, &count);
       }else{
         for(int x = 0; x < (map->columns * map->lines); x++){
@@ -436,7 +446,7 @@ void djikstraTypeC(Map * map, Point * st, unsigned short * wt, FILE * fout) {
     }
   }
 
-
+  //If there's a path
   if(valid == 1){
     for(int i = 0; i < map->numPoints; i++){
       permutation[i] = i;
@@ -445,6 +455,7 @@ void djikstraTypeC(Map * map, Point * st, unsigned short * wt, FILE * fout) {
     //Memory allocation for the best permutation
     bestPermutation = (int *)malloc(map->numPoints * sizeof(int));
 
+    //Get the permutation with the smallest cost
     bestPermutation = permute(map->numPoints, adj, permutation, 1, &finalCost, map, bestPermutation, 0);
     for(int i = 0; i < map->numPoints-1; i++){
       if(bestPermutation[i] > bestPermutation[i+1]){
@@ -485,15 +496,15 @@ void djikstraTypeC(Map * map, Point * st, unsigned short * wt, FILE * fout) {
     fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, -1, 0);
   }
 
-  // free(permutation);
-  // free(bestPermutation);
-  // for(int i = 0; i < map->numPoints - 1; i++) {
-  //   for(int j = i + 1; j < map->numPoints; j++){
-  //     free(adj[i][j].path);
-  //   }
-  //   free(adj[i]);
-  // }
-  // free(adj);
+  free(permutation);
+  free(bestPermutation);
+  for(int i = 0; i < map->numPoints - 1; i++) {
+    for(int j = i + 1; j < map->numPoints; j++){
+      free(adj[i][j].path);
+    }
+    free(adj[i]);
+  }
+  free(adj);
 }
 
 
@@ -508,6 +519,7 @@ void swapPoints(int *point1, int *point2) {
 
 int * permute(int N, Adjacencias ** adj, int * array, int i, int *bestPermutationCost, Map * map, int* bestPermutation, int cost) {
   static int counter = 0;
+  //Avoid the fist time we enter the function
   if(i != 1) {
     if(array[i-2] > array[i-1]){
       cost += adj[array[i -1]][array[i-2]].pathCost + map->map[adj[array[i-1]][array[i-2]].initPoint.x][adj[array[i-1]][array[i-2]].initPoint.y] - map->map[adj[array[i-1]][array[i-2]].finalPoint.x][adj[array[i-1]][array[i-2]].finalPoint.y];
@@ -515,10 +527,12 @@ int * permute(int N, Adjacencias ** adj, int * array, int i, int *bestPermutatio
       cost += adj[array[i-2]][array[i-1]].pathCost;
     }
   }
+  //Check it it's a worthless permutation
   if(cost >= *bestPermutationCost && *bestPermutationCost != INFINITY){
     return NULL;
   }
 
+  //Verify if we have reached the final point in the current permutation
   if(i == N){
     if(*bestPermutationCost > cost ) {
       *bestPermutationCost = cost;
@@ -528,6 +542,7 @@ int * permute(int N, Adjacencias ** adj, int * array, int i, int *bestPermutatio
   }
   counter++;
 
+  //Iterate through all points and swap them to create the different permutations
     for (int j = i; j < N; j++) {
       if(i == j) {
         permute(N, adj, array, i+1, bestPermutationCost, map, bestPermutation, cost);
