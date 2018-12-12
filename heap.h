@@ -20,9 +20,6 @@ Node parent(int index, Node * items);
 
 void swap(int index1, int index2, Node * items);
 
-//TODO maybe do the "ensureExtraCapacity function"
-
-Node peek(int size, Node * items);
 Node pop(int *size, Node * items);
 
 
@@ -32,6 +29,16 @@ void heapifyUp(int size, Node * items);
 
 void heapifyDown(int size, Node * items);
 
-void printHeap(int size, Node * items);
+//Funtions for djikstraC
+void swapC(int index1, int index2, Node * items, int** heapPositions);
+
+Node popC(int *size, Node * items, int** heapPositions);
+
+
+void addC(Node , Node * , int *, int *, int** heapPositions);
+
+void heapifyUpC(int size, Node * items, int** heapPositions);
+
+void heapifyDownC(int size, Node * items, int** heapPositions);
 
 #endif

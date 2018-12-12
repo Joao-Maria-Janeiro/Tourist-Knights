@@ -5,7 +5,7 @@
 #include "data.h"
 #include "heap.h"
 
-#define INFINIY 2147483647
+#define INFINIY 65534
 
 
 void readFromFile(char * file_name) {
@@ -51,7 +51,7 @@ void readFromFile(char * file_name) {
       map = (Map*)malloc(sizeof(Map));
       allocatePoints(map, lines, columns, objective, numPoints);
       for(i = 0; i < numPoints; i++){
-        lixinho = fscanf(fp, "%d %d", &map->points[i].x, &map->points[i].y);
+        lixinho = fscanf(fp, "%hd %hd", &map->points[i].x, &map->points[i].y);
       }
 
       //If it's type A we check if it can be done with only one horse jump
@@ -67,7 +67,7 @@ void readFromFile(char * file_name) {
           //Read necessary lines for cost calcuations
           for(i = 0; i < numLines; i++){
             for(j = 0; j < columns; j++){
-              lixinho = fscanf(fp, "%d ", &map->map[i][j]);
+              lixinho = fscanf(fp, "%hd ", &map->map[i][j]);
             }
           }
           //Move the pointer to the end of the map
@@ -85,25 +85,23 @@ void readFromFile(char * file_name) {
           //Alocação para a matriz st (de pontos, para o caminho)
           Point *st = (Point*)malloc(sizeof(Point)*(lines * columns));
           //Alocação para a matriz wt (de custos)
-          int *wt = (int*)malloc(sizeof(int)*(lines * columns));
+          unsigned short *wt = (unsigned short*)malloc(sizeof(unsigned short)*(lines * columns));
           Point empty;
           empty.x = -1;
           empty.y = -1;
           //Else read all the lines
           for(i = 0; i < lines; i++){
-            // st[i] = (Point*)malloc(sizeof(Point)*columns);
-            // wt[i] = (int*)malloc(sizeof(int)*columns);
             for(j = 0; j < columns; j++){
               wt[i*columns + j] = INFINIY;
               st[i*columns + j] = empty;
-              lixinho = fscanf(fp, "%d ", &map->map[i][j]);
+              lixinho = fscanf(fp, "%hd ", &map->map[i][j]);
             }
           }
           //select the correct read function for the current objective
           switch (map->objective){
             case 'A':
               if(verifyPoints(map, numPoints)) {
-                toPrint = djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout, &count);
+                toPrint = djikstraTypeA(map, map->points[0], map->points[1], st, wt, fout, &count, 1);
                 if(toPrint != NULL){
                   fprintf(fout, "%d %d %c %d %d %d\n", map->lines, map->columns, map->objective, map->numPoints, wt[(map->points[1].x *map->columns) + map->points[1].y], count);
                   for(int i=count -1; i>=0; i--) {
@@ -208,9 +206,9 @@ void allocatePoints(Map * newMap, int lines, int columns, char objective, int nu
 }
 
 void allocateMap(Map * map, int numLines, int numColumns) {
-  map->map = (int**)malloc(sizeof(int*) * numLines);
+  map->map = (short**)malloc(sizeof(short*) * numLines);
   for(int i=0; i<numLines; i++) {
-    map->map[i] = (int*)malloc(sizeof(int) * numColumns);
+    map->map[i] = (short*)malloc(sizeof(short) * numColumns);
   }
 }
 
